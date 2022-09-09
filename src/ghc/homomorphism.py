@@ -1,4 +1,5 @@
 from ghc.utils.hom import nx2homg, tree_list, cycle_list, path_list, hom_profile, tree_list_random
+from ghc.generate_k_tree import partial_ktree_sample, Nk_strategy
 import homlib as hl
 import networkx as nx
 import numpy as np
@@ -107,6 +108,22 @@ def random_tree_profile(graphs, size=6, density=False, seed=8, **kwargs):
     return homX
 
 
+def random_ktree_profile(graphs, size=6, density=False, seed=8, pattern_count=50, **kwargs):
+
+    tw_downweighting_p = 0.35
+    partial_ktree_edge_keeping_p = 0.9
+
+    sizes, treewidths = Nk_strategy(max_size=size, pattern_count=pattern_count, p=tw_downweighting_p)
+    
+    kt_list = list()
+    for size, tw in zip(sizes, treewidths):
+        kt_list += partial_ktree_sample(N=size, k=tw, p=partial_ktree_edge_keeping_p)
+
+    homX = list()
+    for G in graphs:
+        homX += [hom(G, kt, density=density) for kt in kt_list]
+    return homX
+
 
 def tree_rprofile(G, size=6, density=False, **kwargs):
     """Run tree right homomorphism profile for a single graph G."""
@@ -155,7 +172,9 @@ def get_hom_profile(f_str):
     elif f_str == "tree":
         return tree_profile
     elif f_str == "random_tree":
-        return random_tree_profile
+        return random_tree_profile  
+    elif f_str == "random_ktree":
+        return random_ktree_profile
     elif f_str == "path":
         return path_profile
     elif f_str == "cycle":
@@ -166,4 +185,4 @@ def get_hom_profile(f_str):
         return atlas_profile
     else:  # Return all posible options
         return ["labeled_tree", "labeled_tree_exp",
-                "tree", "random_tree", "path", "cycle", "tree+cycle", "atlas"]
+                "tree", "random_tree", "path", "cycle", "tree+cycle", "atlas", "random_ktree"]
