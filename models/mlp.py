@@ -11,7 +11,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from tqdm import tqdm
-from ghc.homomorphism import get_hom_profile, random_tree_profile
+from ghc.homomorphism import get_hom_profile, random_tree_profile, random_ktree_profile
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, augment_data
 from ghc.utils.ml import accuracy
@@ -53,6 +53,7 @@ if __name__ == "__main__":
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
     parser.add_argument('--hom_size', type=int, default=6)
+    parser.add_argument('--pattern_count', type=int, default=50)
     parser.add_argument('--drop_nodes', action="store_true", default=False)
     parser.add_argument('--drop_nodes_rate', type=int, default=1)
     parser.add_argument('--gen_per_graph', type=int, default=1)
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     splits = load_folds(args.data.upper(), args.dloc)
     hom_func = get_hom_profile(args.hom_type)
     try:
-        if hom_func != random_tree_profile:
+        if hom_func not in {random_tree_profile, random_ktree_profile}:
             homX = load_precompute(args.data.upper(),
                             args.hom_type,
                             args.hom_size,
@@ -96,11 +97,11 @@ if __name__ == "__main__":
     except FileNotFoundError:
         if X is not None:
             # changed it to batch computation to not recompute the patterns each time
-            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed)
+            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
             save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
                             os.path.join(args.dloc, "precompute"))
         else:
-            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed)
+            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
             save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
                             os.path.join(args.dloc, "precompute"))
     #### If data augmentation is enabled
