@@ -1,5 +1,4 @@
-from ghc.utils.hom import nx2homg, tree_list, cycle_list,\
-                          path_list, hom_profile
+from ghc.utils.hom import nx2homg, tree_list, cycle_list, path_list, hom_profile, tree_list_random
 import homlib as hl
 import networkx as nx
 import numpy as np
@@ -82,16 +81,31 @@ def hom(F, G, use_py=False, density=False):
     return hom_func(F, G) * scaler
 
 
-def atlas_profile(G, size=20, start=0, density=False, **kwargs):
+def atlas_profile(graphs, size=20, start=0, density=False, **kwargs):
     """Run homomorphism count for each graph in the nx atlas"""
     atlas_list = nx.atlas.graph_atlas_g()[start:start+size]
-    return [hom(ga, G, density=density) for ga in atlas_list]
+    homX = []
+    for G in graphs:
+        homX.append([hom(t, G, density=density) for t in atlas_list])
+    return homX
 
 
-def tree_profile(G, size=6, density=False, **kwargs):
-    """Run tree homomorphism profile for a single graph G."""
+def tree_profile(graphs, size=6, density=False, **kwargs):
+    """Run tree homomorphism profile for a batch of graphs"""
     t_list = tree_list(size)
-    return [hom(t, G, density=density) for t in t_list]
+    homX = []
+    for G in graphs:
+        homX.append([hom(t, G, density=density) for t in t_list])
+    return homX
+
+def random_tree_profile(graphs, size=6, density=False, seed=8, **kwargs):
+    """Run tree homomorphism profile for a batch of graphs"""
+    t_list = tree_list_random(size, seed)
+    homX = []
+    for G in graphs:
+        homX.append([hom(t, G, density=density) for t in t_list])
+    return homX
+
 
 
 def tree_rprofile(G, size=6, density=False, **kwargs):
@@ -140,6 +154,8 @@ def get_hom_profile(f_str):
         return explabeled_tree_profile
     elif f_str == "tree":
         return tree_profile
+    elif f_str == "random_tree":
+        return random_tree_profile
     elif f_str == "path":
         return path_profile
     elif f_str == "cycle":
@@ -150,4 +166,4 @@ def get_hom_profile(f_str):
         return atlas_profile
     else:  # Return all posible options
         return ["labeled_tree", "labeled_tree_exp",
-                "tree", "path", "cycle", "tree+cycle", "atlas"]
+                "tree", "random_tree", "path", "cycle", "tree+cycle", "atlas"]

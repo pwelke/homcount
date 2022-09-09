@@ -11,7 +11,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from tqdm import tqdm
-from ghc.homomorphism import get_hom_profile
+from ghc.homomorphism import get_hom_profile, random_tree_profile
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, augment_data
 from ghc.utils.ml import accuracy
@@ -85,16 +85,27 @@ if __name__ == "__main__":
     splits = load_folds(args.data.upper(), args.dloc)
     hom_func = get_hom_profile(args.hom_type)
     try:
-        homX = load_precompute(args.data.upper(),
-                        args.hom_type,
-                        args.hom_size,
-                        os.path.join(args.dloc, "precompute"))
+        if hom_func != random_tree_profile:
+            homX = load_precompute(args.data.upper(),
+                            args.hom_type,
+                            args.hom_size,
+                            os.path.join(args.dloc, "precompute"))
+        else:
+            raise FileNotFoundError
+
     except FileNotFoundError:
-        homX = [hom_func(g, size=args.hom_size, density=False, node_tags=X[i])\
-                for i, g in enumerate(tqdm(graphs, desc="Hom"))]
-        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
-                        os.path.join(args.dloc, "precompute"))
+        if X is not None:
+            # changed it to batch computation to not recompute the patterns each time
+            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed)
+            save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
+                            os.path.join(args.dloc, "precompute"))
+        else:
+            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed)
+            save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
+                            os.path.join(args.dloc, "precompute"))
     #### If data augmentation is enabled
+    if args.verbose:
+        print(homX[0])
     if args.drop_nodes:
         gen_graphs, gen_X, gen_y = augment_data(graphs, X, y,
                                                 args.gen_per_graph,

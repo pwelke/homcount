@@ -1,7 +1,7 @@
 import networkx as nx 
 from itertools import combinations
 from ghc.data_utils import nx2homg
-
+from numpy.random import random_sample
 
 def tree_list(size=6, num_loops=0):
     """Generate nonisomorphic trees up to size `size`."""
@@ -9,6 +9,14 @@ def tree_list(size=6, num_loops=0):
                        nx.generators.nonisomorphic_trees(i)]
     if num_loops > 0:
         t_list = add_loops(t_list, num_loops)
+    return t_list
+    
+def tree_list_rand(size=6, num_loops=0, p=1):    	
+    """Generate nonisomorphic trees up to size `size`."""
+    t_list = [tree for i in range(2, size+1) for tree in \
+                       nx.generators.nonisomorphic_trees(i)]
+    if num_loops > 0 and random_sample() >= 1-p:
+    	t_list = add_loops(t_list, num_loops)
     return t_list
 
 
