@@ -50,10 +50,11 @@ if __name__ == "__main__":
 
     #### Parse arguments
     parser = argparse.ArgumentParser()
+    parser.add_argument('--pattern_count', type=int, default=50)
+
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
     parser.add_argument('--hom_size', type=int, default=6)
-    parser.add_argument('--pattern_count', type=int, default=50)
     parser.add_argument('--drop_nodes', action="store_true", default=False)
     parser.add_argument('--drop_nodes_rate', type=int, default=1)
     parser.add_argument('--gen_per_graph', type=int, default=1)
