@@ -1,9 +1,12 @@
 import networkx as nx
 from networkx.relabel import convert_node_labels_to_integers
 import os
+import numpy as np
 
 import subprocess
 import tempfile
+import re
+
 
 def id_to_str(n):
     digits = [int(d) for d in str(n)]
@@ -53,8 +56,19 @@ def networkxToDISCDataGraphBatch(graphs, dir):
                     if int(str(v)) < int(str(w)):
                         file.write(str(v)+" "+str(w)+"\n")
 
-def readDISCcounts(dir):
-    pass
+def readDISCcounts(directory):
+
+    files = [f for f in filter(lambda x: x.endswith('embedding.txt'), os.listdir(directory))]
+    files.sort(key=lambda f: int(re.sub('\D', '', f)))
+
+    X = list()
+    for f in files:
+        Gx = np.loadtxt(os.path.join(directory, f), dtype=np.double)
+        X.append(Gx)
+
+    return np.vstack(X)
+
+
 
 
 def DISChom(pattern_list, graph_list):
@@ -76,11 +90,12 @@ def DISChom(pattern_list, graph_list):
 
             # invoke DISC and collect issues
             cwd = '../DISC/'
-            args = ['sbt', f'runMain org.apache.spark.disc.BatchBatchSubgraphCounting --queryType HOM --executionMode Result --environment Local --queryFile {pattern_file} -t {graph_directory} --output {os.path.join(tmp_directory, "homcount")}']
+
+            args = ['sbt', f'runMain org.apache.spark.disc.BatchBatchSubgraphCounting --queryType HOM --executionMode CountReturn --environment Local --queryFile {pattern_file} -t {graph_directory} --output {os.path.join(tmp_directory, "")}']
             report = subprocess.run(args, cwd=cwd, capture_output=True, check=True)
 
             # collect hom counts
-            hom_counts = 1(dir)
+            hom_counts = readDISCcounts(tmp_directory)
 
             # return everything
             return hom_counts
@@ -90,8 +105,8 @@ if __name__ == '__main__':
     pattern_list = [nx.path_graph(i) for i in range(2,5)]
     graph_list = [nx.path_graph(i) for i in range(2,10)]
 
-    DISChom(pattern_list, graph_list)
-
+    features = DISChom(pattern_list, graph_list)
+    print(features)
 
 
 
