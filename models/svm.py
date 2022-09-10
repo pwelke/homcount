@@ -19,6 +19,8 @@ if __name__ == "__main__":
 
     #### Parse arguments
     parser = argparse.ArgumentParser()
+    parser.add_argument('--pattern_count', type=int, default=50)
+
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
     parser.add_argument('--hom_size', type=int, default=6)
