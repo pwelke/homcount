@@ -3,8 +3,8 @@ from ghc.generate_k_tree import partial_ktree_sample, Nk_strategy
 import homlib as hl
 import networkx as nx
 import numpy as np
-from ghc.utils.DISCio import DISChom
-
+# from ghc.utils.DISCio import DISChom
+from ghc.generate_k_tree import random_ktree_profile
 
 def hom_tree(F, G):
     """Specialized tree homomorphism in Python (serializable).
@@ -108,24 +108,6 @@ def random_tree_profile(graphs, size=6, density=False, seed=8, **kwargs):
         homX.append([hom(t, G, density=density) for t in t_list])
     return homX
 
-
-def random_ktree_profile(graphs, size=6, density=False, seed=8, pattern_count=50, **kwargs):
-
-    tw_downweighting_p = 0.35
-    partial_ktree_edge_keeping_p = 0.9
-
-    sizes, treewidths = Nk_strategy(max_size=size, pattern_count=pattern_count, p=tw_downweighting_p)
-    
-    kt_list = list()
-    for size, tw in zip(sizes, treewidths):
-        kt_list += partial_ktree_sample(N=size, k=tw, p=partial_ktree_edge_keeping_p)
-
-    # homX = list()
-    # for G in graphs:
-    #     homX += [hom(G, kt, density=density) for kt in kt_list]
-    # return homX
-
-    return DISChom(pattern_list=kt_list, graph_list=graphs)
 
 
 def tree_rprofile(G, size=6, density=False, **kwargs):

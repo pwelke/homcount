@@ -11,7 +11,8 @@ import torchvision.transforms as transforms
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from tqdm import tqdm
-from ghc.homomorphism import get_hom_profile, random_tree_profile, random_ktree_profile
+from ghc.homomorphism import get_hom_profile, random_tree_profile
+from ghc.generate_k_tree import random_ktree_profile
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, augment_data
 from ghc.utils.ml import accuracy
@@ -84,16 +85,23 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
     #### Load data and compute homomorphism
     graphs, X, y = load_data(args.data.upper(), args.dloc)
-    splits = load_folds(args.data.upper(), args.dloc)
+    
+    graphs = graphs[:20]
+    X = X[:20]
+    y = y[:20]
+    rng = [i for i in range(20)]
+    splits = [(rng[:15], rng[15:]), (rng[:5] + rng[10:], rng[5:10])]
+
+    # splits = load_folds(args.data.upper(), args.dloc)
     hom_func = get_hom_profile(args.hom_type)
     try:
-        if hom_func not in {random_tree_profile, random_ktree_profile}:
+        # if hom_func not in {random_tree_profile, random_ktree_profile}:
             homX = load_precompute(args.data.upper(),
-                            args.hom_type,
-                            args.hom_size,
-                            os.path.join(args.dloc, "precompute"))
-        else:
-            raise FileNotFoundError
+                        args.hom_type,
+                        args.hom_size,
+                        os.path.join(args.dloc, "precompute"))
+        # else:
+            # raise FileNotFoundError
 
     except FileNotFoundError:
         if X is not None:
