@@ -2,7 +2,9 @@ import networkx as nx
 from networkx.relabel import convert_node_labels_to_integers
 import os
 import numpy as np
+from tqdm import tqdm
 
+import sys
 import subprocess
 import tempfile
 import re
@@ -70,35 +72,75 @@ def readDISCcounts(directory):
 
 
 
-
-def DISChom(pattern_list, graph_list):
+def DISChomBatch(pattern_list, graph_list):
     '''Compute homomorphism counts for a batch of patterns and a batch of 
     (transaction) graphs using DISC.
 
     Files which are used to communicate data between Python and DISC (hadoop) 
-    are written to a temp folder and deleted afterwards. '''
+    are written to a temp folder. 
+    
+    Defective due to some memory issues in DISC'''
 
-    # open temp directory and pattern file
-    with tempfile.TemporaryDirectory() as tmp_directory:
-        with tempfile.TemporaryDirectory() as graph_directory:
+    tmp_directory = tempfile.mkdtemp()
+    graph_directory = tempfile.mkdtemp()
+    # # open temp directory and pattern file
+    # with tempfile.TemporaryDirectory() as tmp_directory:
+    #     with tempfile.TemporaryDirectory() as graph_directory:
         
-            # store patterns and graphs
-            pattern_file = os.path.join(tmp_directory, 'patterns')
-            with open(pattern_file, 'w') as pattern_fileobj:
-                networkxToDISCPatternBatch(pattern_list, pattern_fileobj)
-            networkxToDISCDataGraphBatch(graph_list, graph_directory)
+    # store patterns and graphs
+    pattern_file = os.path.join(tmp_directory, 'patterns')
+    with open(pattern_file, 'w') as pattern_fileobj:
+        networkxToDISCPatternBatch(pattern_list, pattern_fileobj)
+    networkxToDISCDataGraphBatch(graph_list, graph_directory)
 
-            # invoke DISC and collect issues
-            cwd = '../DISC/'
+    # invoke DISC and collect issues
+    cwd = './DISC/'
 
-            args = ['sbt', f'runMain org.apache.spark.disc.BatchBatchSubgraphCounting --queryType HOM --executionMode CountReturn --environment Local --queryFile {pattern_file} -t {graph_directory} --output {os.path.join(tmp_directory, "")}']
-            report = subprocess.run(args, cwd=cwd, capture_output=True, check=True)
+    args = ['sbt', f'runMain org.apache.spark.disc.BatchBatchSubgraphCounting --queryType HOM --executionMode CountReturn --environment Local --queryFile {pattern_file} -t {graph_directory} --output {os.path.join(tmp_directory, "")}']
+    report = subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
 
-            # collect hom counts
-            hom_counts = readDISCcounts(tmp_directory)
+    # collect hom counts
+    hom_counts = readDISCcounts(tmp_directory)
 
-            # return everything
-            return hom_counts
+    # return everything
+    return hom_counts
+
+
+def DISChom(pattern_list, graph_list):
+    '''Compute homomorphism counts for a batch of patterns and a batch of 
+    (transaction) graphs using DISC. For each transaction graph, we call DISC
+    anew.
+
+    Files which are used to communicate data between Python and DISC (hadoop) 
+    are written to a temp folder. '''
+
+    tmp_directory = tempfile.mkdtemp()
+    graph_directory = tempfile.mkdtemp()
+    # # open temp directory and pattern file
+    # with tempfile.TemporaryDirectory() as tmp_directory:
+    #     with tempfile.TemporaryDirectory() as graph_directory:
+        
+    # store patterns and graphs
+    pattern_file = os.path.join(tmp_directory, 'patterns')
+    with open(pattern_file, 'w') as pattern_fileobj:
+        networkxToDISCPatternBatch(pattern_list, pattern_fileobj)
+    networkxToDISCDataGraphBatch(graph_list, graph_directory)
+
+    # invoke DISC and collect issues
+    cwd = './DISC/'
+
+    files = [f for f in filter(lambda x: x.endswith('.txt'), os.listdir(graph_directory))]
+    files.sort(key=lambda f: int(re.sub('\D', '', f)))
+
+    for f in tqdm(files):
+        args = ['sbt', f'runMain org.apache.spark.disc.BatchSubgraphCounting --queryType HOM --executionMode CountReturn --environment Local --queryFile {pattern_file} -t {os.path.join(graph_directory, f)} --output {os.path.join(tmp_directory, "")}']
+        report = subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
+
+    # collect hom counts
+    hom_counts = readDISCcounts(tmp_directory)
+
+    # return everything
+    return hom_counts
 
 
 if __name__ == '__main__':
