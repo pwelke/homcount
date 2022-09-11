@@ -3,6 +3,8 @@ import random
 import itertools
 import matplotlib.pyplot as plt
 
+from ghc.utils.DISCio import DISChom
+
 import numpy as np
 
 
@@ -103,17 +105,20 @@ def Nk_strategy(max_size, pattern_count, p=0.35):
     return sizes, treewidths
 
 
-
 def random_ktree_profile(graphs, size=6, density=False, seed=8, pattern_count=50, **kwargs):
 
     tw_downweighting_p = 0.35
     partial_ktree_edge_keeping_p = 0.9
 
-    sizes, treewidths = Nk_strategy(max_size=size, pattern_count=pattern_count, p=tw_downweighting_p)
     
     kt_list = list()
-    for size, tw in zip(sizes, treewidths):
-        kt_list += partial_ktree_sample(N=size, k=tw, p=partial_ktree_edge_keeping_p)
+    while len(kt_list) < pattern_count:
+        
+        sizes, treewidths = Nk_strategy(max_size=size, pattern_count=1, p=tw_downweighting_p)
+
+        kt_list += filter(lambda p: len(p.nodes) > 1, partial_ktree_sample(N=sizes[0], k=treewidths[0], p=partial_ktree_edge_keeping_p))
+        
+    kt_list = kt_list[:pattern_count] # the above might result in more than pattern_count patterns
 
     # homX = list()
     # for G in graphs:
@@ -121,14 +126,20 @@ def random_ktree_profile(graphs, size=6, density=False, seed=8, pattern_count=50
     # return homX
 
     return DISChom(pattern_list=kt_list, graph_list=graphs)
-    
+
 
 if __name__ == '__main__':
-    connected_patterns = partial_ktree_sample(7, 1, 0.9)
 
-    for P in connected_patterns:
-        nx.draw_kamada_kawai(P)
-        plt.show()
+    pattern_list = [nx.path_graph(i) for i in range(2,5)]
+    graph_list = [nx.path_graph(i) for i in range(2,10)]
+    
+    random_ktree_profile(graph_list)
+
+    # connected_patterns = partial_ktree_sample(7, 1, 0.9)
+
+    # for P in connected_patterns:
+    #     nx.draw_kamada_kawai(P)
+    #     plt.show()
 
 
-    # print(Nk_strategy(6, 10))
+    # # print(Nk_strategy(6, 10))
