@@ -133,7 +133,7 @@ def DISChom(pattern_list, graph_list):
     files.sort(key=lambda f: int(re.sub('\D', '', f)))
 
     for f in tqdm(files):
-        args = ['sbt', f'runMain org.apache.spark.disc.BatchSubgraphCounting --queryType HOM --executionMode CountReturn --environment Local --queryFile {pattern_file} -t {os.path.join(graph_directory, f)} --output {os.path.join(tmp_directory, "")}']
+        args = ['sbt', f'runMain org.apache.spark.disc.BatchSubgraphCounting --queryType HOM --executionMode Count --environment Local --queryFile {pattern_file} -d {os.path.join(graph_directory, f)} --output {os.path.join(tmp_directory, "")}']
         report = subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
 
     # collect hom counts
@@ -141,6 +141,26 @@ def DISChom(pattern_list, graph_list):
 
     # return everything
     return hom_counts
+
+
+
+def random_ktree_profile(graphs, size=6, density=False, seed=8, pattern_count=50, **kwargs):
+
+    tw_downweighting_p = 0.35
+    partial_ktree_edge_keeping_p = 0.9
+
+    sizes, treewidths = Nk_strategy(max_size=size, pattern_count=pattern_count, p=tw_downweighting_p)
+    
+    kt_list = list()
+    for size, tw in zip(sizes, treewidths):
+        kt_list += partial_ktree_sample(N=size, k=tw, p=partial_ktree_edge_keeping_p)
+
+    # homX = list()
+    # for G in graphs:
+    #     homX += [hom(G, kt, density=density) for kt in kt_list]
+    # return homX
+
+    return DISChom(pattern_list=kt_list, graph_list=graphs)
 
 
 if __name__ == '__main__':
