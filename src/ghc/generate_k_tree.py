@@ -105,6 +105,27 @@ def Nk_strategy(max_size, pattern_count, p=0.35):
     return sizes, treewidths
 
 
+def min_embedding(pattern_list, graph_list):
+    '''For each (transaction) graph, we use only those patterns that
+    have smaller or equal size. This implements the min-kernel as 
+    descibed in the paper. 
+
+    TODO: We could speed up homomorphism counting by counting 
+    only those patterns in a graph that have smaller or equal size. 
+    '''
+
+    pattern_sizes = np.array([len(g.nodes) for g in pattern_list]).reshape([1, len(pattern_list)])
+    graph_sizes = np.array([len(g.nodes) for g in graph_list]).reshape([len(graph_list), 1])
+
+    full_embeddings = DISChom(pattern_list, graph_list)
+
+    # note that this is numpy broadcast magic given the specific shapes of pattern_sizes and graph_sizes
+    min_embeddings = np.where(pattern_sizes<=graph_sizes, full_embeddings, 0)
+
+    return min_embeddings
+
+
+
 def random_ktree_profile(graphs, size=6, density=False, seed=8, pattern_count=50, **kwargs):
 
     tw_downweighting_p = 0.35
@@ -125,7 +146,7 @@ def random_ktree_profile(graphs, size=6, density=False, seed=8, pattern_count=50
     #     homX += [hom(G, kt, density=density) for kt in kt_list]
     # return homX
 
-    return DISChom(pattern_list=kt_list, graph_list=graphs)
+    return min_embedding(pattern_list=kt_list, graph_list=graphs)
 
 
 if __name__ == '__main__':
@@ -133,7 +154,7 @@ if __name__ == '__main__':
     pattern_list = [nx.path_graph(i) for i in range(2,5)]
     graph_list = [nx.path_graph(i) for i in range(2,10)]
     
-    random_ktree_profile(graph_list)
+    random_ktree_profile(graph_list, pattern_count=10)
 
     # connected_patterns = partial_ktree_sample(7, 1, 0.9)
 
