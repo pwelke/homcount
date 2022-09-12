@@ -1,7 +1,6 @@
 import networkx as nx
 import random
 import itertools
-import matplotlib.pyplot as plt
 
 from ghc.utils.DISCio import DISChom
 
@@ -154,13 +153,6 @@ if __name__ == '__main__':
     pattern_list = [nx.path_graph(i) for i in range(2,5)]
     graph_list = [nx.path_graph(i) for i in range(2,10)]
     
-    random_ktree_profile(graph_list, pattern_count=10)
-
-    # connected_patterns = partial_ktree_sample(7, 1, 0.9)
-
-    # for P in connected_patterns:
-    #     nx.draw_kamada_kawai(P)
-    #     plt.show()
+    print(random_ktree_profile(graph_list, pattern_count=10))
 
 
-    # # print(Nk_strategy(6, 10))
