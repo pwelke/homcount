@@ -26,17 +26,17 @@ def to_onehot(y, nmax=None):
     return oh
 
 
-def save_precompute(X, dataset, hom_type, hom_size, dloc):
+def save_precompute(X, dataset, hom_type, hom_size, pattern_count, run_id, dloc):
     dataf = os.path.abspath(dloc)
-    tmp_str = "{}/{}_{}_{}.hom"
-    with open(tmp_str.format(dataf,dataset,hom_type,hom_size), 'wb') as f:
+    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.hom"
+    with open(tmp_str, 'wb') as f:
         pkl.dump(X, f)
 
 
-def load_precompute(dataset, hom_type, hom_size, dloc):
+def load_precompute(dataset, hom_type, hom_size, pattern_count, run_id, dloc):
     dataf = os.path.abspath(dloc)
-    tmp_str = "{}/{}_{}_{}.hom"
-    with open(tmp_str.format(dataf,dataset,hom_type,hom_size), 'rb') as f:
+    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.hom"
+    with open(tmp_str, 'rb') as f:
         X = pkl.load(f)
     return X
 

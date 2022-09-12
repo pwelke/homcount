@@ -52,6 +52,7 @@ if __name__ == "__main__":
     #### Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--pattern_count', type=int, default=50)
+    parser.add_argument('--run_id', type=str, default=0)
 
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
@@ -73,6 +74,7 @@ if __name__ == "__main__":
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument("--log_period", type=int, default=200)
     args = parser.parse_args()
+    
     #### Setup devices and random seeds
     torch.manual_seed(args.seed)
     device_id = "cpu"
@@ -80,9 +82,11 @@ if __name__ == "__main__":
         torch.cuda.manual_seed(args.seed)
         device_id = "cuda:"+str(args.gpu_id)
     device = torch.device(device_id)
+    
     #### Setup checkpoints and precompute
     os.makedirs("./checkpoints/", exist_ok=True)
     os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
+    
     #### Load data and compute homomorphism
     graphs, X, y = load_data(args.data.upper(), args.dloc)
     
@@ -95,24 +99,21 @@ if __name__ == "__main__":
     # splits = load_folds(args.data.upper(), args.dloc)
     hom_func = get_hom_profile(args.hom_type)
     try:
-        # if hom_func not in {random_tree_profile, random_ktree_profile}:
-            homX = load_precompute(args.data.upper(),
+        homX = load_precompute(args.data.upper(),
                         args.hom_type,
                         args.hom_size,
+                        args.pattern_count,
+                        args.run_id,
                         os.path.join(args.dloc, "precompute"))
-        # else:
-            # raise FileNotFoundError
 
     except FileNotFoundError:
         if X is not None:
             # changed it to batch computation to not recompute the patterns each time
             homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
-            save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
+            save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
                             os.path.join(args.dloc, "precompute"))
-        else:
-            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
-            save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
-                            os.path.join(args.dloc, "precompute"))
+
+    
     #### If data augmentation is enabled
     if args.verbose:
         print(homX[0])
@@ -134,6 +135,7 @@ if __name__ == "__main__":
     tensorX = torch.Tensor(homX).float().to(device)
     tensorX = tensorX / (tensorX.max(0, keepdim=False)[0] + 0.5)
     tensory = torch.Tensor(y).flatten().long().to(device)
+    
     #### Train and Test functions
     def train(m, o, idx, tX, ty):
         m.train()
@@ -152,6 +154,7 @@ if __name__ == "__main__":
             loss_test = F.nll_loss(output[idx], tensory[idx])
             acc_test = accuracy(output[idx], tensory[idx])
             return loss_test.item(), acc_test.item()
+    
     #### Run for 10-folds scores
     scores = []
     for split in tqdm(splits, desc="10-folds"):

@@ -22,6 +22,7 @@ if __name__ == "__main__":
     #### Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--pattern_count', type=int, default=50)
+    parser.add_argument('--run_id', type=str, default=0)
 
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
@@ -69,34 +70,34 @@ if __name__ == "__main__":
     param_grid = {'C': Cs, 'gamma': gammas, 'class_weight': class_weight}
 
     args = parser.parse_args()
+    
     #### Setup devices and random seeds
     device_id = "cpu"
+    
     #### Setup checkpoints and precompute
     os.makedirs("./checkpoints/", exist_ok=True)
     os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
+   
     #### Load data and compute homomorphism
     graphs, X, y = load_data(args.data.upper(), args.dloc)
     y = y.flatten()
     splits = load_folds(args.data.upper(), args.dloc)
     hom_func = get_hom_profile(args.hom_type)
-    #try:
-    #    if hom_func != random_tree_profile:
-    #        homX = load_precompute(args.data.upper(),
-    #                               args.hom_type,
-    #                               args.hom_size,
-    #                               os.path.join(args.dloc, "precompute"))
-    #    else:
-    #        raise FileNotFoundError
-    #except FileNotFoundError:
-    if X is not None:
-        # changed it to batch computation to not recompute the patterns each time
-        homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed)
-        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
+    try:
+        homX = load_precompute(args.data.upper(),
+                        args.hom_type,
+                        args.hom_size,
+                        args.pattern_count,
+                        args.run_id,
                         os.path.join(args.dloc, "precompute"))
-    else:
-        homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed)
-        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
-                        os.path.join(args.dloc, "precompute"))
+
+    except FileNotFoundError:
+        if X is not None:
+            # changed it to batch computation to not recompute the patterns each time
+            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
+            save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+                            os.path.join(args.dloc, "precompute"))
+
     #### If data augmentation is enabled
     if args.verbose:
         print(homX[0])
@@ -109,6 +110,7 @@ if __name__ == "__main__":
                               node_tags=gen_X) \
                      for g in tqdm(gen_graphs, desc="Hom (aug)")]
     X = np.array(homX)
+    
     # Train SVC 
     print(X.shape)
     print("Training SVM...")
