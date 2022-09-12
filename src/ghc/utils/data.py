@@ -10,7 +10,7 @@ from sklearn.model_selection import StratifiedKFold
 from homlib import Graph as hlGraph
 
 
-ALL_DATA = ["MUTAG", "PTC_MR", "IMDB-BINARY", "IMDB-MULTI", "NCI1", "PROTEINS",
+ALL_DATA = ["MUTAG", "PTC_MR", "IMDBBINARY", "IMDBMULTI", "NCI1", "PROTEINS",
             "REDDIT-BINARY", "REDDIT-MULTI-5K", "REDDIT-MULTI-12K", "COLLAB",
             "DD", "ENZYMES", "NCI109", "BZR", "COX2", "BZR_MD", "COX2_MD"]
 
