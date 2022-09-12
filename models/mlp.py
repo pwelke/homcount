@@ -89,14 +89,15 @@ if __name__ == "__main__":
     
     #### Load data and compute homomorphism
     graphs, X, y = load_data(args.data.upper(), args.dloc)
-    
-    graphs = graphs[:20]
-    X = X[:20]
-    y = y[:20]
-    rng = [i for i in range(20)]
-    splits = [(rng[:15], rng[15:]), (rng[:5] + rng[10:], rng[5:10])]
+    splits = load_folds(args.data.upper(), args.dloc)
 
-    # splits = load_folds(args.data.upper(), args.dloc)
+    # # for 'fast' experimentation, mock MUTAG even smaller
+    # graphs = graphs[:20]
+    # X = X[:20]
+    # y = y[:20]
+    # rng = [i for i in range(20)]
+    # splits = [(rng[:15], rng[15:]), (rng[:5] + rng[10:], rng[5:10])]
+
     hom_func = get_hom_profile(args.hom_type)
     try:
         homX = load_precompute(args.data.upper(),
