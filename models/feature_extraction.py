@@ -62,7 +62,6 @@ if __name__ == "__main__":
     
     #### Load data and compute homomorphism
     graphs, X, y = load_data(args.data.upper(), args.dloc)
-    splits = load_folds(args.data.upper(), args.dloc)
     hom_func = get_hom_profile(args.hom_type)
     try:
         homX = load_precompute(args.data.upper(),
