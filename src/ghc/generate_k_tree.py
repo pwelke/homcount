@@ -18,20 +18,9 @@ def random_ktree_decomposition(N, k, seed=None):
     if k > N - 1:
         raise ValueError(f'k(={k})+1 cannot be larger than N(={N})')
 
-    # if N == 1:
-    #     T = nx.Graph()
-    #     T.add_node(1)
-    #     return [], (T, [[1]])
-
-    # if k < N:
     # sample a random tree for the tree decomposition
     T = nx.generators.random_tree(N-k, seed=seed)
     bfs = nx.bfs_edges(T, 0)
-
-    # else:
-    #     # the tree is a singleton
-    #     T = nx.Graph()
-    #     T.add_node(1)
 
     rnd = random.seed(seed)
 
@@ -91,8 +80,7 @@ def partial_ktree_sample(N, k, p, seed=None):
     return connected_components
 
 
-
-def Nk_strategy_geom(max_size, pattern_count, p=0.35):
+def Nk_strategy_geom(max_size, pattern_count, p='by_max'):
 
     if p == 'by_max':
         p = 1. - 1. / max_size
@@ -105,6 +93,7 @@ def Nk_strategy_geom(max_size, pattern_count, p=0.35):
     treewidths = np.where(treewidths<sizes-1, treewidths, sizes - 1)
 
     return sizes, treewidths
+
 
 def Nk_strategy_poisson(max_size, pattern_count, lam='by_max'):
 
@@ -119,6 +108,7 @@ def Nk_strategy_poisson(max_size, pattern_count, lam='by_max'):
     treewidths = np.where(treewidths<sizes-1, treewidths, sizes - 1)
 
     return sizes, treewidths
+
 
 def Nk_strategy_fiddly(max_size, pattern_count, lam='by_max'):
 
