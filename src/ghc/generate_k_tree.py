@@ -116,7 +116,7 @@ def Nk_strategy_fiddly(max_size, pattern_count, lam='by_max'):
         lam = (1. + np.log(max_size)) / max_size
 
     # draw sizes from uniform distribution
-    sizes = np.random.randint(2, max_size+1, size=pattern_count)
+    sizes = np.random.default_rng().geometric(p=0.1, size=pattern_count) #randint(2, max_size+1, size=pattern_count)
 
     # draw treewidths from geometric distribution, but bounded by size - 1
     treewidths = np.random.randint(1, 4, size=pattern_count) + np.random.default_rng().poisson(lam=lam, size=pattern_count)
@@ -161,7 +161,7 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
     kt_list = list()
     while len(kt_list) < pattern_count:
         
-        sizes, treewidths = Nk_strategy(max_size=size, pattern_count=1, p=tw_downweighting_p)
+        sizes, treewidths = Nk_strategy(size, 1, 'by_max')
 
         kt_list += filter(lambda p: len(p.nodes) > 1, partial_ktree_sample(N=sizes[0], k=treewidths[0], p=partial_ktree_edge_keeping_p))
         
