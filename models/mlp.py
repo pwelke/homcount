@@ -53,10 +53,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--pattern_count', type=int, default=50)
     parser.add_argument('--run_id', type=str, default=0)
+    parser.add_argument('--hom_size', type=int, default=6)
+
 
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
-    parser.add_argument('--hom_size', type=int, default=6)
     parser.add_argument('--drop_nodes', action="store_true", default=False)
     parser.add_argument('--drop_nodes_rate', type=int, default=1)
     parser.add_argument('--gen_per_graph', type=int, default=1)
@@ -74,6 +75,11 @@ if __name__ == "__main__":
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument("--log_period", type=int, default=200)
     args = parser.parse_args()
+
+    if args.hom_size == -1:
+        args.hom_size = 'max' # use maximum graph size in database
+        
+
     
     #### Setup devices and random seeds
     torch.manual_seed(args.seed)
@@ -89,7 +95,10 @@ if __name__ == "__main__":
     
     #### Load data and compute homomorphism
     graphs, X, y = load_data(args.data.upper(), args.dloc)
-    splits = load_folds(args.data.upper(), args.dloc)
+    try:
+        splits = load_folds(args.data.upper(), args.dloc)
+    except FileNotFoundError:
+        splits = create_folds(args.data.upper(), args.dloc, X)
 
     # # for 'fast' experimentation, mock MUTAG even smaller
     # graphs = graphs[:20]
