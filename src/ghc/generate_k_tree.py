@@ -94,6 +94,9 @@ def partial_ktree_sample(N, k, p, seed=None):
 
 def Nk_strategy_geom(max_size, pattern_count, p=0.35):
 
+    if p == 'by_max':
+        p = 1. - 1. / max_size
+
     # draw sizes from uniform distribution
     sizes = np.random.randint(2, max_size+1, size=pattern_count)
 
@@ -106,20 +109,34 @@ def Nk_strategy_geom(max_size, pattern_count, p=0.35):
 def Nk_strategy_poisson(max_size, pattern_count, lam='by_max'):
 
     if lam == 'by_max':
+        lam = (1. + 3 * np.log(max_size)) / max_size
+
+    # draw sizes from uniform distribution
+    sizes = np.random.randint(2, max_size+1, size=pattern_count)
+
+    # draw treewidths from geometric distribution, but bounded by size - 1
+    treewidths = 1 + np.random.default_rng().poisson(lam=lam, size=pattern_count)
+    treewidths = np.where(treewidths<sizes-1, treewidths, sizes - 1)
+
+    return sizes, treewidths
+
+def Nk_strategy_fiddly(max_size, pattern_count, lam='by_max'):
+
+    if lam == 'by_max':
         lam = (1. + np.log(max_size)) / max_size
 
     # draw sizes from uniform distribution
     sizes = np.random.randint(2, max_size+1, size=pattern_count)
 
     # draw treewidths from geometric distribution, but bounded by size - 1
-    treewidths = np.random.default_rng().poisson(lam=lam, size=pattern_count)
+    treewidths = np.random.randint(1, 4, size=pattern_count) + np.random.default_rng().poisson(lam=lam, size=pattern_count)
     treewidths = np.where(treewidths<sizes-1, treewidths, sizes - 1)
 
     return sizes, treewidths
 
 
 # this is currently our default selection strategy for pattern sizes and treewidths
-Nk_strategy = Nk_strategy_geom
+Nk_strategy = Nk_strategy_fiddly
 
 
 def min_embedding(pattern_list, graph_list):
@@ -173,9 +190,10 @@ if __name__ == '__main__':
     pattern_list = [nx.path_graph(i) for i in range(2,5)]
     graph_list = [nx.path_graph(i) for i in range(2,10)]
 
-    print(Nk_strategy_geom(30, 20))
+    print(Nk_strategy_geom(30, 20, p='by_max'))
     print(Nk_strategy_poisson(30,20))
+    print(Nk_strategy_fiddly(30,20))
     
-    print(random_ktree_profile(graph_list, pattern_count=10))
+    # print(random_ktree_profile(graph_list, pattern_count=10))
 
 
