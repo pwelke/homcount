@@ -6,7 +6,7 @@ import random
 import os
 import random
 from itertools import repeat
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import KFold
 from homlib import Graph as hlGraph
 
 
@@ -118,6 +118,18 @@ def load_folds(dname, dloc):
     name = os.path.abspath(os.path.join(dloc, dname))
     with open(name+".folds", "rb") as f:
         splits = pkl.load(f)
+    return splits
+
+
+def create_folds(dname, dloc, X):
+    """Create 10-fold splits for a dataset"""
+
+    folder = KFold(n_splits=10, shuffle=True)
+    splits = [s for s in folder.split(X)]
+
+    name = os.path.abspath(os.path.join(dloc, dname))
+    with open(name+".folds", "wb") as f:
+        pkl.dump(splits, file=f)
     return splits
 
 
