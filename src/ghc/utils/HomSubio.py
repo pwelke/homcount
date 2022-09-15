@@ -37,7 +37,7 @@ def HomSub(pattern_list, graph_list, td_list, verbose=False):
     npatterns = len(pattern_list)
     with open(os.path.join(graph_directory, 'features.csv'), 'w') as features:
         for ig in tqdm(range(ngraphs)):
-            for jp in tqdm(range(npatterns)):
+            for jp in range(npatterns):
 
                 # HomSub expects a tree decomposition of the pattern in a file named tam.out
                 with open('tam.out', 'w') as td_file:
