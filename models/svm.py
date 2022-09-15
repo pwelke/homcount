@@ -3,7 +3,7 @@ import numpy as np
 from tqdm import tqdm
 from time import time
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
-                           load_folds, augment_data
+                           load_folds, create_folds, augment_data
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, accuracy_score
@@ -59,7 +59,6 @@ if __name__ == "__main__":
     parser.add_argument("--scaler", type=str, default="standard",
                         help="Name of data scaler to use as the preprocessing step")
 
-
     Cs = np.logspace(-5, 6, 20)
     gammas = np.logspace(-5, 1, 5)
     class_weight = ['balanced']
@@ -86,7 +85,7 @@ if __name__ == "__main__":
     try:
         splits = load_folds(args.data.upper(), args.dloc)
     except FileNotFoundError:
-        splits = create_folds(args.data.upper(), args.dloc, X)
+        splits = create_folds(args.data.upper(), args.dloc, y)
 
     hom_func = get_hom_profile(args.hom_type)
     try:
@@ -129,7 +128,8 @@ if __name__ == "__main__":
                 grid_search = GridSearchCV(SVC(kernel=args.kernel), param_grid, cv=args.gs_nfolds,
                                            n_jobs=8)
                 grid_search.fit(X_train,y_train)
-                print(grid_search.best_params_)
+                if args.verbose:
+                    print(grid_search.best_params_)
                 clf = SVC(**grid_search.best_params_)
             else:
                 clf = SVC(C=args.C, kernel=args.kernel, degree=args.degree, 
@@ -137,7 +137,7 @@ if __name__ == "__main__":
                           random_state=None, class_weight='balanced')
             clf.fit(X_train, y_train)
             # print("train", f1_score(y_pred=clf.predict(X_train), y_true=y_train))
-            acc.append(f1_score(y_pred=clf.predict(X_test), 
+            acc.append(accuracy_score(y_true, y_pred)(y_pred=clf.predict(X_test), 
                                 y_true=y_test, average=args.f1avg))
             # print("val", f1_score(y_pred=clf.predict(X_test),
                                 # y_true=y_test, average=args.f1avg))

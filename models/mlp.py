@@ -14,7 +14,7 @@ from tqdm import tqdm
 from ghc.homomorphism import get_hom_profile, random_tree_profile
 from ghc.generate_k_tree import random_ktree_profile
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
-                           load_folds, augment_data
+                           load_folds, create_folds, augment_data
 from ghc.utils.ml import accuracy
 import sys
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     try:
         splits = load_folds(args.data.upper(), args.dloc)
     except FileNotFoundError:
-        splits = create_folds(args.data.upper(), args.dloc, X)
+        splits = create_folds(args.data.upper(), args.dloc, y)
 
 
     hom_func = get_hom_profile(args.hom_type)
