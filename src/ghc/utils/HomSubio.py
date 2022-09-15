@@ -11,7 +11,7 @@ import re
 
 
 
-def HomSub(pattern_list, graph_list, td_list):
+def HomSub(pattern_list, graph_list, td_list, verbose=False):
     '''Compute homomorphism counts for a batch of patterns and a batch of 
     (transaction) graphs using HomSub. For each pattern-transaction pair, we call HomSub
     anew.
@@ -36,14 +36,16 @@ def HomSub(pattern_list, graph_list, td_list):
     ngraphs = len(graph_list)
     npatterns = len(pattern_list)
     with open(os.path.join(graph_directory, 'features.csv'), 'w') as features:
-        for ig in range(ngraphs):
-            for jp in range(npatterns):
+        for ig in tqdm(range(ngraphs)):
+            for jp in tqdm(range(npatterns)):
 
                 # HomSub expects a tree decomposition of the pattern in a file named tam.out
                 with open('tam.out', 'w') as td_file:
                     td_file.write(td_list[jp])
 
-                sys.stderr.write(f'pattern_{jp} n={len(pattern_list[jp].nodes)} m={len(pattern_list[jp].edges)}, graph_{ig} n={len(graph_list[ig].nodes)} m={len(graph_list[ig].edges)}' + '\n')
+                if verbose:
+                    sys.stderr.write(f'pattern_{jp} n={len(pattern_list[jp].nodes)} m={len(pattern_list[jp].edges)}, graph_{ig} n={len(graph_list[ig].nodes)} m={len(graph_list[ig].edges)}' + '\n')
+                
                 args = ['./HomSub/experiments-build/experiments/experiments',
                         '-count-hom',
                         '-h', os.path.join(graph_directory, f'pattern_{jp}.gr'), 
