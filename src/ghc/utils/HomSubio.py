@@ -11,7 +11,7 @@ import re
 
 
 
-def HomSub(pattern_list, graph_list):
+def HomSub(pattern_list, graph_list, td_list):
     '''Compute homomorphism counts for a batch of patterns and a batch of 
     (transaction) graphs using HomSub. For each pattern-transaction pair, we call HomSub
     anew.
@@ -38,6 +38,11 @@ def HomSub(pattern_list, graph_list):
     with open(os.path.join(graph_directory, 'features.csv'), 'w') as features:
         for ig in range(ngraphs):
             for jp in range(npatterns):
+
+                # HomSub expects a tree decomposition of the pattern in a file named tam.out
+                with open('tam.out', 'w') as td_file:
+                    td_file.write(td_list[jp])
+
                 sys.stderr.write(f'pattern_{jp} n={len(pattern_list[jp].nodes)} m={len(pattern_list[jp].edges)}, graph_{ig} n={len(graph_list[ig].nodes)} m={len(graph_list[ig].edges)}' + '\n')
                 args = ['./HomSub/experiments-build/experiments/experiments',
                         '-count-hom',
@@ -59,7 +64,7 @@ def HomSub(pattern_list, graph_list):
 
 def PACE_graph_format(g):
     string = f'p tw {len(g.nodes)} {len(g.edges)}\n'
-    string += '\n'.join([f'{e[0] + 1} {e[1] + 1}' for e in g.edges])
+    string += '\n'.join([f'{min(e[0], e[1]) + 1} {max(e[0], e[1]) + 1}' for e in g.edges])
     string += '\n'
     return string
 
@@ -80,7 +85,7 @@ if __name__ == '__main__':
 
     # print(PACE_graph_format(graph_list[2]))
 
-    HomSub(pattern_list, graph_list)
+    HomSub(pattern_list, graph_list, None)
 
 
 
