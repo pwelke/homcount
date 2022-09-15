@@ -2,8 +2,7 @@ import networkx as nx
 import random
 import itertools
 
-from ghc.utils.DISCio import DISChom
-
+from ghc.utils.HomSubio import HomSub
 import numpy as np
 
 
@@ -31,15 +30,26 @@ def random_ktree_decomposition(N, k, seed=None):
 
     candidates = [v for v in range(k+1, N)]
 
+    # PACE_tdstring = f's td {N-k} {k+1} {N}\n'
+    # PACE_tdstring += 'b 1' + ' '.join(str(v) for v in bags[0] + '\n')
+
+    # PACE_tdedges = ''
+    # PACE_gstring = f'p tw {N} {}'
+    # PACE_gedges = ''
+
     for i, e in enumerate(bfs):
         bag = bags[e[0]].copy()
         deleted_vertex = bag.pop(random.randint(0, k-1))
         new_vertex = candidates[i]
         for v in bag:
             edges.append((v, new_vertex))
+            # PACE_gedges += f'{v + 1} {new_vertex + 1}\n'
         bag.append(new_vertex)
         bags[e[1]] = bag
-        
+
+        # PACEstring += f'b {i+1}' + ' '.join(str(v + 1) for v in bag + '\n')
+
+    # PACEstring += PACEedges    
     tree_decomposition = (T, bags)
 
     return edges, tree_decomposition
@@ -141,7 +151,7 @@ def min_embedding(pattern_list, graph_list):
     pattern_sizes = np.array([len(g.nodes) for g in pattern_list]).reshape([1, len(pattern_list)])
     graph_sizes = np.array([len(g.nodes) for g in graph_list]).reshape([len(graph_list), 1])
 
-    full_embeddings = DISChom(pattern_list, graph_list)
+    full_embeddings = HomSub(pattern_list, graph_list)
 
     # note that this is numpy broadcast magic given the specific shapes of pattern_sizes and graph_sizes
     min_embeddings = np.where(pattern_sizes<=graph_sizes, full_embeddings, 0)
@@ -149,14 +159,10 @@ def min_embedding(pattern_list, graph_list):
     return min_embeddings
 
 
-
-def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, **kwargs):
-
-    tw_downweighting_p = 0.35
+def get_pattern_list(size, pattern_count):
+    
+    # tw_downweighting_p = 0.35
     partial_ktree_edge_keeping_p = 0.9
-
-    if size == 'max':
-        size = max([len(g.nodes) for g in graphs])
     
     kt_list = list()
     while len(kt_list) < pattern_count:
@@ -166,7 +172,14 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
         kt_list += filter(lambda p: len(p.nodes) > 1, partial_ktree_sample(N=sizes[0], k=treewidths[0], p=partial_ktree_edge_keeping_p))
         
     kt_list = kt_list[:pattern_count] # the above might result in more than pattern_count patterns
+    return kt_list
 
+def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, **kwargs):
+
+    if size == 'max':
+        size = max([len(g.nodes) for g in graphs])
+
+    kt_list = get_pattern_list(size, pattern_count)
     # homX = list()
     # for G in graphs:
     #     homX += [hom(G, kt, density=density) for kt in kt_list]
@@ -177,6 +190,8 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
 
 if __name__ == '__main__':
 
+    create_fixed_pattern_set()
+
     pattern_list = [nx.path_graph(i) for i in range(2,5)]
     graph_list = [nx.path_graph(i) for i in range(2,10)]
 
@@ -184,6 +199,6 @@ if __name__ == '__main__':
     print(Nk_strategy_poisson(30,20))
     print(Nk_strategy_fiddly(30,20))
     
-    # print(random_ktree_profile(graph_list, pattern_count=10))
+    print(random_ktree_profile(graph_list, pattern_count=10))
 
 
