@@ -30,10 +30,9 @@ if __name__ == "__main__":
 
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
-    parser.add_argument('--drop_nodes', action="store_true", default=False)
-    parser.add_argument('--drop_nodes_rate', type=int, default=1)
-    parser.add_argument('--gen_per_graph', type=int, default=1)
     parser.add_argument('--dloc', type=str, default="./data")
+
+    # arguments for compatibility reasons which are ignored
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--epochs', type=int, default=5000)
     parser.add_argument('--bs', type=int, default=32)
@@ -46,6 +45,9 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', action="store_true", default=False)
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument("--log_period", type=int, default=200)
+
+
+
     args = parser.parse_args()
 
     if args.hom_size == -1:
@@ -65,7 +67,7 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
     
     #### Load data and compute homomorphism
-    graphs, X, y = load_data(args.data.upper(), args.dloc)
+    graphs, _, y = load_data(args.data.upper(), args.dloc)
     hom_func = get_hom_profile(args.hom_type)
     try:
         homX = load_precompute(args.data.upper(),
@@ -74,13 +76,14 @@ if __name__ == "__main__":
                         args.pattern_count,
                         args.run_id,
                         os.path.join(args.dloc, "precompute"))
+        print(f'({args.data.upper()},{args.hom_type},{args.hom_size},{args.pattern_count},{args.run_id},{os.path.join(args.dloc, "precompute")}) loads')
+        
 
     except FileNotFoundError:
-        if X is not None:
-            # changed it to batch computation to not recompute the patterns each time
-            homX = hom_func(graphs, density=False, seed=args.seed, pattern_count=args.pattern_count, pattern_size=args.hom_size)
-            save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                            os.path.join(args.dloc, "precompute"))
+        # changed it to batch computation to not recompute the patterns each time
+        homX = hom_func(graphs, density=False, seed=args.seed, pattern_count=args.pattern_count, pattern_size=args.hom_size)
+        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+                        os.path.join(args.dloc, "precompute"))
 
     
     

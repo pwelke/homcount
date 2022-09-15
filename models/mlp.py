@@ -55,14 +55,12 @@ if __name__ == "__main__":
     parser.add_argument('--run_id', type=str, default=0)
     parser.add_argument('--hom_size', type=int, default=6)
 
-
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
-    parser.add_argument('--drop_nodes', action="store_true", default=False)
-    parser.add_argument('--drop_nodes_rate', type=int, default=1)
-    parser.add_argument('--gen_per_graph', type=int, default=1)
     parser.add_argument('--dloc', type=str, default="./data")
     parser.add_argument('--seed', type=int, default=0)
+
+    # mlp parameters
     parser.add_argument('--epochs', type=int, default=5000)
     parser.add_argument('--bs', type=int, default=32)
     parser.add_argument('--lr', type=float, default=0.001)
@@ -74,6 +72,10 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', action="store_true", default=False)
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument("--log_period", type=int, default=200)
+
+    # parameters for compatibility that will be ignored
+    parser.add_argument("--grid_search", action="store_true", default=False)
+
     args = parser.parse_args()
 
     if args.hom_size == -1:
@@ -94,18 +96,13 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
     
     #### Load data and compute homomorphism
-    graphs, X, y = load_data(args.data.upper(), args.dloc)
+    # the middle parameter loads graph feature info and is ignored, for now
+    graphs, _, y = load_data(args.data.upper(), args.dloc)
     try:
         splits = load_folds(args.data.upper(), args.dloc)
     except FileNotFoundError:
         splits = create_folds(args.data.upper(), args.dloc, X)
 
-    # # for 'fast' experimentation, mock MUTAG even smaller
-    # graphs = graphs[:20]
-    # X = X[:20]
-    # y = y[:20]
-    # rng = [i for i in range(20)]
-    # splits = [(rng[:15], rng[15:]), (rng[:5] + rng[10:], rng[5:10])]
 
     hom_func = get_hom_profile(args.hom_type)
     try:
@@ -117,31 +114,15 @@ if __name__ == "__main__":
                         os.path.join(args.dloc, "precompute"))
 
     except FileNotFoundError:
-        if X is not None:
-            # changed it to batch computation to not recompute the patterns each time
-            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
-            save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                            os.path.join(args.dloc, "precompute"))
+
+        # changed it to batch computation to not recompute the patterns each time
+        homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
+        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+                        os.path.join(args.dloc, "precompute"))
 
     
-    #### If data augmentation is enabled
-    if args.verbose:
-        print(homX[0])
-    if args.drop_nodes:
-        gen_graphs, gen_X, gen_y = augment_data(graphs, X, y,
-                                                args.gen_per_graph,
-                                                rate=args.drop_nodes_rate)
-        gen_hom_X = [hom_func(g, size=args.hom_size,
-                              density=False,
-                              node_tags=gen_X)\
-                     for g in tqdm(gen_graphs, desc="Hom (aug)")]
-        tensor_gen_X = torch.Tensor(gen_hom_X).float().to(device)
-        scaler = (tensor_gen_X.max(0, keepdim=True)[0] + 0.5)
-        tensor_gen_X = tensor_gen_X / scaler
-        tensor_gen_y = torch.Tensor(gen_y).flatten().long().to(device)
-    else:
-        tensor_gen_X = None
-        tensor_gen_y = None
+    tensor_gen_X = None
+    tensor_gen_y = None
     tensorX = torch.Tensor(homX).float().to(device)
     tensorX = tensorX / (tensorX.max(0, keepdim=False)[0] + 0.5)
     tensory = torch.Tensor(y).flatten().long().to(device)
@@ -177,14 +158,7 @@ if __name__ == "__main__":
         idx_train, idx_test = split
         idx_train = torch.Tensor(idx_train).long().to(device)
         idx_test = torch.Tensor(idx_test).long().to(device)
-        if args.drop_nodes:
-            expander = lambda k: [k*args.gen_per_graph+i for i in\
-                                  range(args.gen_per_graph)]
-            idx_train_gen = torch.Tensor([i for j in idx_train for\
-                                          i in expander(j)])
-            idx_train_gen = torch.Tensor(idx_train_gen).long().to(device)
-        else:
-            idx_train_gen = None
+        idx_train_gen = None
         checkpt_file = 'checkpoints/'+uuid.uuid4().hex[:4]+'-'+args.data+'.pt'
         if args.verbose:
             print(device_id, checkpt_file)
@@ -193,9 +167,6 @@ if __name__ == "__main__":
         best_epoch = 0
         acc = 0
         for epoch in range(args.epochs):
-            if args.drop_nodes:
-                _, _ = train(model, optimizer, idx_train_gen,
-                             tensor_gen_X, tensor_gen_y)
             loss_train, acc_train = train(model, optimizer, idx_train,
                                           tensorX, tensory)
             if args.verbose:

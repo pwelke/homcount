@@ -25,14 +25,12 @@ if __name__ == "__main__":
     parser.add_argument('--run_id', type=str, default=0)
     parser.add_argument('--hom_size', type=int, default=6)
 
-
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
-    parser.add_argument('--drop_nodes', action="store_true", default=False)
-    parser.add_argument('--drop_nodes_rate', type=int, default=1)
-    parser.add_argument('--gen_per_graph', type=int, default=1)
     parser.add_argument('--dloc', type=str, default="./data")
     parser.add_argument('--seed', type=int, default=0)
+
+    # arguments for compatibility reasons that are ignored
     parser.add_argument('--epochs', type=int, default=5000)
     parser.add_argument('--bs', type=int, default=32)
     parser.add_argument('--lr', type=float, default=0.001)
@@ -44,6 +42,7 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', action="store_true", default=False)
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument("--log_period", type=int, default=200)
+    
     # Hyperparams for SVM
     parser.add_argument("--C", type=float, help="SVC's C parameter.", default=1e4)
     parser.add_argument("--kernel", type=str, help="SVC kernel function.",
@@ -52,9 +51,6 @@ if __name__ == "__main__":
                         default=2)
     parser.add_argument("--gamma", type=float, help="SVC's gamma parameter.",
                         default=40.0)
-    # Misc
-    parser.add_argument("--num_run", type=int, default=3,
-                        help="Number of experiments to run.")
     parser.add_argument("--grid_search", action="store_true", default=False)
     parser.add_argument("--gs_nfolds", type=int, default=5)
     parser.add_argument("--disable_hom", action="store_true", default=False)
@@ -63,7 +59,6 @@ if __name__ == "__main__":
     parser.add_argument("--scaler", type=str, default="standard",
                         help="Name of data scaler to use as the preprocessing step")
 
-    parser.add_argument("--test_ratio", type=float, default=.1)
 
     Cs = np.logspace(-5, 6, 20)
     gammas = np.logspace(-5, 1, 5)
@@ -85,7 +80,8 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
    
     #### Load data and compute homomorphism
-    graphs, X, y = load_data(args.data.upper(), args.dloc)
+    # the middle parameter loads graph feature info and is ignored, for now
+    graphs, _, y = load_data(args.data.upper(), args.dloc)
     y = y.flatten()
     try:
         splits = load_folds(args.data.upper(), args.dloc)
@@ -102,23 +98,12 @@ if __name__ == "__main__":
                         os.path.join(args.dloc, "precompute"))
 
     except FileNotFoundError:
-        if X is not None:
-            # changed it to batch computation to not recompute the patterns each time
-            homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
-            save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                            os.path.join(args.dloc, "precompute"))
+        # changed it to batch computation to not recompute the patterns each time
+        homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
+        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+                        os.path.join(args.dloc, "precompute"))
 
-    #### If data augmentation is enabled
-    if args.verbose:
-        print(homX[0])
-    if args.drop_nodes:
-        gen_graphs, gen_X, gen_y = augment_data(graphs, X, y,
-                                                args.gen_per_graph,
-                                                rate=args.drop_nodes_rate)
-        gen_hom_X = [hom_func(g, size=args.hom_size,
-                              density=False,
-                              node_tags=gen_X) \
-                     for g in tqdm(gen_graphs, desc="Hom (aug)")]
+
     X = np.array(homX)
     
     # Train SVC 
@@ -126,10 +111,11 @@ if __name__ == "__main__":
     print("Training SVM...")
     svm_time = time()
     a_acc = []  # All accuracies of num_run
-    for j in tqdm(range(args.num_run)):
+    # for j in tqdm(range(args.num_run)):
+    if True:
         acc = []
-        skf = StratifiedKFold(n_splits=int(1/args.test_ratio), shuffle=True)
-        for train_idx, test_idx in skf.split(X, y): 
+        # skf = StratifiedKFold(n_splits=int(1/args.test_ratio), shuffle=True)
+        for train_idx, test_idx in tqdm(splits): # skf.split(X, y): 
             X_train = X[train_idx]
             X_test = X[test_idx] 
             y_train = y[train_idx] 
@@ -150,11 +136,11 @@ if __name__ == "__main__":
                           gamma=args.gamma, decision_function_shape='ovr',
                           random_state=None, class_weight='balanced')
             clf.fit(X_train, y_train)
-            print("train", f1_score(y_pred=clf.predict(X_train), y_true=y_train))
+            # print("train", f1_score(y_pred=clf.predict(X_train), y_true=y_train))
             acc.append(f1_score(y_pred=clf.predict(X_test), 
                                 y_true=y_test, average=args.f1avg))
-            print("val", f1_score(y_pred=clf.predict(X_test),
-                                y_true=y_test, average=args.f1avg))
+            # print("val", f1_score(y_pred=clf.predict(X_test),
+                                # y_true=y_test, average=args.f1avg))
         a_acc.extend(acc)
     svm_time = time() - svm_time
     print("Accuracy: {:.4f} +/- {:.4f}".format(np.mean(a_acc), np.std(a_acc)))
