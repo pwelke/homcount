@@ -137,7 +137,7 @@ if __name__ == "__main__":
                           random_state=None, class_weight='balanced')
             clf.fit(X_train, y_train)
             # print("train", f1_score(y_pred=clf.predict(X_train), y_true=y_train))
-            acc.append(accuracy_score(y_true, y_pred)(y_pred=clf.predict(X_test), 
+            acc.append(accuracy_score(y_pred=clf.predict(X_test), 
                                 y_true=y_test, average=args.f1avg))
             # print("val", f1_score(y_pred=clf.predict(X_test),
                                 # y_true=y_test, average=args.f1avg))
