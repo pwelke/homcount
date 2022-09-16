@@ -1,42 +1,20 @@
-![Test](https://github.com/gear/graph-homomorphism-network/workflows/Test/badge.svg)
 
-# Graph Homomorphism Convolution
+# Graph Homomorphism Sampling and Counting
+
+Our code to sample patterns and then count homomorphisms started as a fork
+of the [code for the Graph Homomorphism Convolution](https://github.com/gear/graph-homomorphism-network) paper. 
+
+Below, you can find the original README of that repository, but be aware that we have changed quite a few things, in particular `mlp.py` and `svm.py`.
+
+
+## Graph Homomorphism Convolution
 Proof of concept for Graph Homomorphism Convolution.
 http://arxiv.org/abs/2005.01214 (ICML'20)
 
 Note: Code for left homomorphism is for our ICML'20 paper.
 Code for right homomorphism is our continued work.
 
-## Setup
-To obtain required packages and install our modules, run
-```
-pip install -r requirements.txt
-```
-This script installs `homlib` and `ghc`.
-
-## Download and pack data
-This package is not dependent on `torch-geometric` but we will use 
-`torch-geometric` to load and pack data. Download `data.zip` from
-```
-https://drive.google.com/file/d/15w7UyqG_MjCqdRL2fA87m7-vanjddKNh/view?usp=sharing
-```
-and extract to `data/`. For example MUTAG dataset should have: `data/MUTAG.graph`
-, `data/MUTAG.X`, `data/MUTAG.y`, and `data/MUTAG.folds`. 
-
-## Quick run with ipython
-```
-from ghc.homomorphism import hom 
-from ghc.utils.data import load_data
-from ghc.utils.hom import tree_list
-
-graphs, X, y = load_data("MUTAG", "./data")
-trees = tree_list(4, num_loops=1)
-
-# right hom
-print(hom(graphs[0], trees[-1]))
-```
-
-## Run experiments
+### Run experiments
 Experiment scripts are placed in the top level of this repository and named 
 by the machine learning model. In general, a 10-fold CV score is reported.
 For example,
