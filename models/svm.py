@@ -60,7 +60,7 @@ if __name__ == "__main__":
                         help="Name of data scaler to use as the preprocessing step")
 
     Cs = np.logspace(start=-5, stop=6, num=20).tolist()
-    gammas = np.logspace(start=-5, stop=2, num=8).tolist() + ['scale']
+    gammas = np.logspace(start=-5, stop=1, num=7).tolist() + ['scale']
     class_weight = ['balanced']
     param_grid = {'C': Cs, 'gamma': gammas, 'class_weight': class_weight}
 
