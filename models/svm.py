@@ -142,4 +142,4 @@ if __name__ == "__main__":
                                 # y_true=y_test, average=args.f1avg))
         a_acc.extend(acc)
     svm_time = time() - svm_time
-    print("Accuracy: {:.4f} +/- {:.4f}".format(np.mean(a_acc), np.std(a_acc)))
+    print(f"RUN {args.run_id} dims {X.shape[0]} {X.shape[1]} SVM {args.data.upper()} mean {np.mean(a_acc):.4f} std {np.std(a_acc):.4f}")
