@@ -59,8 +59,8 @@ if __name__ == "__main__":
     parser.add_argument("--scaler", type=str, default="standard",
                         help="Name of data scaler to use as the preprocessing step")
 
-    Cs = np.logspace(-5, 6, 20)
-    gammas = np.logspace(-5, 1, 5)
+    Cs = np.logspace(start=-5, stop=6, num=20).tolist()
+    gammas = np.logspace(start=-5, stop=2, num=8).tolist() + ['scale']
     class_weight = ['balanced']
     param_grid = {'C': Cs, 'gamma': gammas, 'class_weight': class_weight}
 
