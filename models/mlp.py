@@ -188,5 +188,5 @@ if __name__ == "__main__":
     scores = np.array(scores)
     print('CV score:{:.4f}, {:.4f}'.format(scores.mean(), scores.std()))
 
-    print(f"RUN {args.run_id} dims {X.shape[0]} {X.shape[1]} SVM {args.data.upper()} mean {np.mean(scores):.4f} std {np.std(scores):.4f}")
+    print(f"RUN {args.run_id} dims {tensorX.shape[0]} {tensorX.shape[1]} SVM {args.data.upper()} mean {np.mean(scores):.4f} std {np.std(scores):.4f}")
 
