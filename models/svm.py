@@ -109,8 +109,6 @@ if __name__ == "__main__":
     X = np.array(homX)
     
     # Train SVC 
-    print(X.shape)
-    print("Training SVM...")
     svm_time = time()
     a_acc = []  # All accuracies of num_run
     # for j in tqdm(range(args.num_run)):

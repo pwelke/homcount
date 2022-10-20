@@ -148,7 +148,7 @@ if __name__ == "__main__":
     
     #### Run for 10-folds scores
     scores = []
-    for split in tqdm(splits, desc="10-folds"):
+    for split in tqdm(splits):
         model = MLP(tensorX.size(-1), int(tensory.max()+1), args.hids,
                     dp=args.dropout).to(device)
         opt_config = [{'params': model.parameters(),
