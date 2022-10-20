@@ -44,6 +44,10 @@ if __name__ == "__main__":
     parser.add_argument("--log_period", type=int, default=200)
     
     # Hyperparams for SVM
+    # makes all pams below obsolete
+    parser.add_argument("--grid_search", action="store_true", default=False)
+
+    # 
     parser.add_argument("--C", type=float, help="SVC's C parameter.", default=1e4)
     parser.add_argument("--kernel", type=str, help="SVC kernel function.",
                         default="rbf")
@@ -51,9 +55,8 @@ if __name__ == "__main__":
                         default=2)
     parser.add_argument("--gamma", type=float, help="SVC's gamma parameter.",
                         default=40.0)
-    parser.add_argument("--grid_search", action="store_true", default=False)
     parser.add_argument("--gs_nfolds", type=int, default=5)
-    parser.add_argument("--disable_hom", action="store_true", default=False)
+    #parser.add_argument("--disable_hom", action="store_true", default=False)
     parser.add_argument("--f1avg", type=str, default="micro",
                         help="Average method for f1.")
     parser.add_argument("--scaler", type=str, default="standard",
