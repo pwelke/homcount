@@ -72,4 +72,4 @@ if __name__ == "__main__":
     homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
     toc = time()
 
-    print(f"RUN {args.run_id} dims {homX.shape[0]} {homX.shape[1]} TIME {args.data.upper()} time {toc-tic:.4f} ")
+    print(f"RUN {args.run_id} dims {homX.shape[0]} {homX.shape[1]} TIME {args.data.upper()} time {toc-tic:.4f} hom_size {hom_size}")
