@@ -62,7 +62,7 @@ def HomSub(pattern_list, graph_list, td_list, verbose=False):
 
     # return everything
     return hom_counts
-
+    
 
 def PACE_graph_format(g):
     string = f'p tw {len(g.nodes)} {len(g.edges)}\n'

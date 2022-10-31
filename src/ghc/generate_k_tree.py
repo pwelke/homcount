@@ -4,6 +4,8 @@ import itertools
 
 from ghc.utils.HomSubio import HomSub, PACE_graph_format
 import numpy as np
+import scipy.spatial.distance as sp
+from tqdm import tqdm
 
 
 def random_ktree_decomposition(N, k, seed=None):
@@ -193,11 +195,34 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
     return min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
 
 
+def product_graph_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, **kwargs):
+
+    product_graphs = list()
+    
+    for g, h in tqdm(itertools.combinations(graphs, 2)):
+        # product_graphs.append(nx.from_numpy_array(np.kron(nx.to_numpy_array(g), nx.to_numpy_array(h))))
+        product_graphs.append(nx.convert_node_labels_to_integers(nx.tensor_product(g,h)))
+
+    if size == 'max':
+        size = max([len(g.nodes) for g in graphs])
+
+    embeddings = random_ktree_profile(product_graphs, size, density, seed, pattern_count)
+
+    kernels = np.sum(embeddings, axis=1)
+
+    gram = sp.squareform(kernels)
+    return gram
+
+
+
+
 if __name__ == '__main__':
 
 
     pattern_list = [nx.path_graph(i) for i in range(2,5)]
     graph_list = [nx.path_graph(i) for i in range(2,10)]
+
+    print(product_graph_ktree_profile(pattern_list, pattern_count=2))
 
     patterns, tds = get_pattern_list(10, 2)
 
