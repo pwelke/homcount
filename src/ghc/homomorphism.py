@@ -1,5 +1,5 @@
 from ghc.utils.hom import nx2homg, tree_list, cycle_list, path_list, hom_profile, tree_list_random
-from ghc.generate_k_tree import partial_ktree_sample, Nk_strategy
+from ghc.generate_k_tree import partial_ktree_sample, Nk_strategy, product_graph_ktree_profile
 import homlib as hl
 import networkx as nx
 import numpy as np
@@ -142,11 +142,18 @@ def explabeled_tree_profile(G, size=6, node_tags=None, **kwargs):
     return np.concatenate(hom_list)
 
 
-def homomorphism_profile(G, size=6, node_tags=None, **kwargs):
+def homomorphism_profile(graphs, size=6, node_tags=None, **kwargs):
     """Run profile for exponentially labeled trees."""
     t_list = hom_profile(size)
-    hom_list = [hom(t, G) for t in t_list]
-    return hom_list
+
+    embeddings = np.zeros([len(graphs), len(t_list)])
+    for i, G in enumerate(graphs):
+        for j, H in enumerate(t_list):
+            hom_list = hom(H, G) 
+
+    return embeddings
+
+
 
 
 def get_hom_profile(f_str):
@@ -168,6 +175,8 @@ def get_hom_profile(f_str):
         return homomorphism_profile
     elif f_str == "atlas":
         return atlas_profile
+    elif f_str == 'product_graph_ktree_profile':
+        return product_graph_ktree_profile        
     else:  # Return all posible options
         return ["labeled_tree", "labeled_tree_exp",
-                "tree", "random_tree", "path", "cycle", "tree+cycle", "atlas", "random_ktree"]
+                "tree", "random_tree", "path", "cycle", "tree+cycle", "atlas", "random_ktree", "product_graph_ktree_profile"]
