@@ -17,7 +17,8 @@ def check_onehot(vertex_labels):
     for g in vertex_labels:
         uni = np.unique(g).__str__()
         if uni != '[0. 1.]':
-            print(f'ERROR: vertex features are not one-hot encoded: {uni}')
+            if uni != '[1]':
+                print(f'ERROR: vertex features are not one-hot encoded: {uni}')
 
 
 if __name__ == "__main__":
@@ -113,6 +114,8 @@ if __name__ == "__main__":
     # assumes vertex labels to be one-hot encoded
     check_onehot(vertex_labels)
     vertex_label_counts = np.array([np.sum(g, axis=0) for g in vertex_labels])
+    if vertex_label_counts.ndim == 1:
+        vertex_label_counts = vertex_label_counts.reshape([-1,1])
     
     X = np.hstack([np.array(homX), vertex_label_counts])
     
