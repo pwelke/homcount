@@ -110,7 +110,7 @@ def load_data(dname, dloc):
         with open(name+".X", "rb") as f:
             X = pkl.load(f)
     else:
-        X = np.ones_like(y)
+        X = np.ones_like(y).reshape([-1, 1])
     return graphs, X, y
 
 
