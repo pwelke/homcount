@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     #### Parse arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--pattern_count', type=int, default=50)
+    parser.add_argument('--pattern_count', type=int, default=50) # if -1 then adjust by expressive power
     parser.add_argument('--run_id', type=str, default=0)
     parser.add_argument('--hom_size', type=int, default=6)
 

@@ -3,6 +3,7 @@ import random
 import itertools
 
 from ghc.utils.HomSubio import HomSub, PACE_graph_format
+from ghc.utils.fast_weisfeiler_lehman import *
 import numpy as np
 import scipy.spatial.distance as sp
 from tqdm import tqdm
@@ -181,19 +182,40 @@ def get_pattern_list(size, pattern_count):
     td_list = td_list[:pattern_count]
     return kt_list, td_list
 
-def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, **kwargs):
+def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, **kwargs):
 
     if size == 'max':
         size = max([len(g.nodes) for g in graphs])
 
-    kt_list, td_list = get_pattern_list(size, pattern_count)
-    # homX = list()
-    # for G in graphs:
-    #     homX += [hom(G, kt, density=density) for kt in kt_list]
-    # return homX
+    if pattern_count > -1:
+        # return the requested number of patterns
+        kt_list, td_list = get_pattern_list(size, pattern_count)
+        return min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
+    else:
+        # adjust pattern count wrt. expressive power on input data. the negative number gives the n_iter of wl
+        wl_nodelabels = homsub_format_wl_nodelabels(graphs, vertex_features=None, n_iter=-pattern_count)
+        wl_representations = np.array([np.sum(g, axis=0) for g in wl_nodelabels])
 
-    return min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
+        kt_list, td_list = get_pattern_list(size, 1)
+        hom_representations = min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
+        comparison = -1
+        stop_step = 0
+        while comparison < 0:
+            kt_list, td_list = get_pattern_list(size, 1)
+            hom_representations = np.hstack([hom_representations, min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)])
+            comparison_new = compare_equivalence_classes(hom_representations, wl_representations)
+            if comparison_new <= comparison:
+                stop_step += 1
+            else:
+                stop_step = 0
+            
+            comparison = comparison_new
+            if stop_step >= early_stopping:
+                break
 
+
+        print(f'NOTE hom representations have shape {hom_representations.shape} to be as powerful as wl with n_iter={-pattern_count}.\n  wl has {np.unique(wl_representations, axis=0).shape[0]} unique reps, hom has {np.unique(hom_representations, axis=0).shape[0]} unique reps')
+        return hom_representations
 
 def product_graph_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, **kwargs):
 

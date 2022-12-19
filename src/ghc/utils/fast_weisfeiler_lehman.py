@@ -27,9 +27,15 @@ def compress_int(labels: np.array):
 
 
 def homsub_format_wl_nodelabels(graphs, vertex_features, n_iter):
+    
     G = nx.disjoint_union_all(graphs)
-    v = np.vstack(vertex_features)
-    vv = from_onehot(v)
+    
+    if vertex_features is not None:
+        v = np.vstack(vertex_features)
+        vv = from_onehot(v)
+    else:
+        vv = None
+
     adj = nx.to_scipy_sparse_matrix(G)
 
     wl_labels = wl_direct_scipysparse(adj, vertex_labels=vv, n_iter=n_iter)
@@ -38,8 +44,8 @@ def homsub_format_wl_nodelabels(graphs, vertex_features, n_iter):
 
     wl_features = list()
     i = 0
-    for vf in vertex_features:
-        n, _ = vf.shape
+    for g in graphs:
+        n = g.number_of_nodes()
         wl_features.append(oh[i:i+n, :])
         i += n
 
@@ -48,7 +54,7 @@ def homsub_format_wl_nodelabels(graphs, vertex_features, n_iter):
 
 def wl_direct_scipysparse(a: sparse.csr_matrix, vertex_labels=None,  n_iter=5):
     if vertex_labels is None:
-        oldlbl = primes[0] * np.ones(len(g.vs))
+        oldlbl = primes[0] * np.ones(a.shape[0])
     else:
         oldlbl = vertex_labels
 
@@ -61,3 +67,18 @@ def wl_direct_scipysparse(a: sparse.csr_matrix, vertex_labels=None,  n_iter=5):
             oldlbl = compress(newlbl)
 
     return newlbl
+
+
+def compare_equivalence_classes(hom_features, wl_features):
+    '''returns the difference between number of unique rows in first argument and 
+    number of unique rows in second argument.
+    
+    That is, the return is positive, if first argument has 'more expressive power'
+    than second argument'''
+
+    hom_uniq = np.unique(hom_features, axis=0)
+    wl_uniq = np.unique(wl_features, axis=0)
+    diff = hom_uniq.shape[0] - wl_uniq.shape[0]
+    print(f'HINT {diff}')
+    # not yet really what we want, but simple
+    return diff
