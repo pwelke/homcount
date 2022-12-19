@@ -8,6 +8,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import f1_score, accuracy_score
 from ghc.homomorphism import get_hom_profile, random_tree_profile
 from ghc.generate_k_tree import random_ktree_profile
+from ghc.utils.fast_weisfeiler_lehman import homsub_format_wl_nodelabels
 
 from sklearn.preprocessing import StandardScaler
 import os
@@ -116,6 +117,9 @@ if __name__ == "__main__":
     vertex_label_counts = np.array([np.sum(g, axis=0) for g in vertex_labels])
     if vertex_label_counts.ndim == 1:
         vertex_label_counts = vertex_label_counts.reshape([-1,1])
+
+    wl_labels = homsub_format_wl_nodelabels(graphs, vertex_labels, n_iter=3)
+    wl_label_counts = np.array([np.sum(g, axis=0) for g in wl_labels])
     
     X = np.hstack([np.array(homX), vertex_label_counts])
     

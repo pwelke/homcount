@@ -25,6 +25,9 @@ def to_onehot(y, nmax=None):
     oh[np.arange(y.size), y] = 1
     return oh
 
+def from_onehot(y):
+    features = np.array([np.where(z == 1) for z in y])
+    return features.reshape([-1,1])
 
 def save_precompute(X, dataset, hom_type, hom_size, pattern_count, run_id, dloc):
     dataf = os.path.abspath(dloc)
