@@ -121,7 +121,7 @@ if __name__ == "__main__":
     wl_labels = homsub_format_wl_nodelabels(graphs, vertex_labels, n_iter=3)
     wl_label_counts = np.array([np.sum(g, axis=0) for g in wl_labels])
     
-    X = np.hstack([np.array(homX), vertex_label_counts])
+    X = np.hstack([np.array(homX), vertex_label_counts, wl_label_counts])
     
     # Train SVC 
     svm_time = time()
