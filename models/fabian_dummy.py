@@ -3,12 +3,6 @@ import uuid
 import argparse
 import pickle as pkl
 from time import time
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-import torchvision.transforms as transforms
-from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from tqdm import tqdm
 from ghc.homomorphism import get_hom_profile, random_tree_profile, random_ktree_profile
@@ -16,6 +10,27 @@ from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, augment_data
 from ghc.utils.ml import accuracy
 import sys
+import json
+
+
+def load_data_for_json(fname, dloc):
+    graphs, feats, y = load_data(fname, dloc)
+    name = os.path.abspath(os.path.join(dloc, fname + '.meta'))
+    with open(name, 'r') as f:
+        metas = json.load(f)
+    return graphs, feats, y, metas
+
+def hom2json(metas, homX, ys):
+    for meta, hom, y in zip(metas, homX, ys):
+        meta['counts'] = hom.tolist()
+        meta['y'] = y
+    return metas
+
+def save_json(meta, dataset, hom_type, hom_size, pattern_count, run_id, dloc):
+    dataf = os.path.abspath(dloc)
+    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.homson"
+    with open(tmp_str, 'w') as f:
+        json.dump(meta, f)
 
 
 if __name__ == "__main__":
@@ -53,37 +68,16 @@ if __name__ == "__main__":
     if args.hom_size == -1:
         args.hom_size = 'max' # use maximum graph size in database
         
-
-    #### Setup devices and random seeds
-    torch.manual_seed(args.seed)
-    device_id = "cpu"
-    if args.cuda:
-        torch.cuda.manual_seed(args.seed)
-        device_id = "cuda:"+str(args.gpu_id)
-    device = torch.device(device_id)
     
     #### Setup checkpoints and precompute
     os.makedirs("./checkpoints/", exist_ok=True)
     os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
     
     #### Load data and compute homomorphism
-    graphs, _, y = load_data(args.data.upper(), args.dloc)
-    hom_func = get_hom_profile(args.hom_type)
-    try:
-        homX = load_precompute(args.data.upper(),
-                        args.hom_type,
-                        args.hom_size,
-                        args.pattern_count,
-                        args.run_id,
-                        os.path.join(args.dloc, "precompute"))
-        print(f'({args.data.upper()},{args.hom_type},{args.hom_size},{args.pattern_count},{args.run_id},{os.path.join(args.dloc, "precompute")}) loads')
-        
+    graphs, _, y, metas = load_data_for_json(args.data.upper(), args.dloc)
+    homX = np.zeros([len(graphs), 3])
 
-    except FileNotFoundError:
-        # changed it to batch computation to not recompute the patterns each time
-        homX = hom_func(graphs, density=False, seed=args.seed, pattern_count=args.pattern_count, pattern_size=args.hom_size)
-        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+    metas = hom2json(metas, homX, y)
+    save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
                         os.path.join(args.dloc, "precompute"))
-
-    
     
