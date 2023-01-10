@@ -5,7 +5,7 @@ import pickle as pkl
 from time import time
 import numpy as np
 from tqdm import tqdm
-from ghc.homomorphism import get_hom_profile, random_tree_profile, random_ktree_profile
+from ghc.homomorphism import get_hom_profile
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, augment_data
 from ghc.utils.ml import accuracy
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     except FileNotFoundError:
         # changed it to batch computation to not recompute the patterns each time
-        homX = hom_func(graphs, density=False, seed=args.seed, pattern_count=args.pattern_count, pattern_size=args.hom_size)
+        homX = hom_func(graphs, density=False, seed=args.seed, pattern_count=args.pattern_count, pattern_size=args.hom_size, metadata=metas)
         save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
                         os.path.join(args.dloc, "precompute"))
 

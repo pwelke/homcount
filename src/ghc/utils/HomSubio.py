@@ -11,7 +11,7 @@ import re
 
 
 
-def HomSub(pattern_list, graph_list, td_list, verbose=False):
+def HomSub(pattern_list, graph_list, td_list, verbose=False, min_embedding=False):
     '''Compute homomorphism counts for a batch of patterns and a batch of 
     (transaction) graphs using HomSub. For each pattern-transaction pair, we call HomSub
     anew.
@@ -51,7 +51,18 @@ def HomSub(pattern_list, graph_list, td_list, verbose=False):
                         '-h', os.path.join(graph_directory, f'pattern_{jp}.gr'), 
                         '-g', os.path.join(graph_directory, f'graph_{ig}.gr')]
                 try:
-                    report = subprocess.run(args, cwd=cwd, stdout=features, stderr=sys.stderr, text=True, check=True)
+                    if min_embedding:
+                        # for the min_embedding, we don't need to compute a count for patterns larger than the current graph 
+                        if len(graph_list[ig].nodes) >= len(pattern_list[jp].nodes):  
+                            if verbose:
+                                sys.stderr.write('doing it\n')             
+                            report = subprocess.run(args, cwd=cwd, stdout=features, stderr=sys.stderr, text=True, check=True)
+                        else:
+                            if verbose:
+                                sys.stderr.write('skipping it\n')                            
+                            features.write('0\n')
+                    else:
+                        report = subprocess.run(args, cwd=cwd, stdout=features, stderr=sys.stderr, text=True, check=True)
                     features.flush()
                 except subprocess.CalledProcessError as e:
                     sys.stderr.write(f'{e}')

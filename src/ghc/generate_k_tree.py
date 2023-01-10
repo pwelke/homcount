@@ -145,18 +145,9 @@ def min_embedding(pattern_list, graph_list, td_list):
     '''For each (transaction) graph, we use only those patterns that
     have smaller or equal size. This implements the min-kernel as 
     descibed in the paper. 
-
-    TODO: We could speed up homomorphism counting by counting 
-    only those patterns in a graph that have smaller or equal size. 
     '''
 
-    pattern_sizes = np.array([len(g.nodes) for g in pattern_list]).reshape([1, len(pattern_list)])
-    graph_sizes = np.array([len(g.nodes) for g in graph_list]).reshape([len(graph_list), 1])
-
-    full_embeddings = HomSub(pattern_list, graph_list, td_list=td_list)
-
-    # note that this is numpy broadcast magic given the specific shapes of pattern_sizes and graph_sizes
-    min_embeddings = np.where(pattern_sizes<=graph_sizes, full_embeddings, 0)
+    min_embeddings = HomSub(pattern_list, graph_list, td_list=td_list, min_embedding=True)
 
     return min_embeddings
 
@@ -182,7 +173,8 @@ def get_pattern_list(size, pattern_count):
     td_list = td_list[:pattern_count]
     return kt_list, td_list
 
-def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, **kwargs):
+
+def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, **kwargs):
 
     if size == 'max':
         size = max([len(g.nodes) for g in graphs])
@@ -191,10 +183,26 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
         # return the requested number of patterns
         kt_list, td_list = get_pattern_list(size, pattern_count)
         return min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
+    
     else:
         # adjust pattern count wrt. expressive power on input data. the negative number gives the n_iter of wl
-        wl_nodelabels = homsub_format_wl_nodelabels(graphs, vertex_features=None, n_iter=-pattern_count)
-        wl_representations = np.array([np.sum(g, axis=0) for g in wl_nodelabels])
+
+        if metadata is not None:
+            # we know the training split 
+            # we want to be not transductive, but truly inductive
+            traingraphs = list()
+            train_idx = list()
+            for graph, meta in zip(graphs, metadata):
+                if meta['split'] == 'train':
+                    traingraphs.append(graph)
+                    train_idx.append(meta['idx'])
+
+            wl_nodelabels = homsub_format_wl_nodelabels(traingraphs, vertex_features=None, n_iter=-pattern_count)
+            wl_representations = np.array([np.sum(g, axis=0) for g in wl_nodelabels])
+        else:
+            # use full dataset for wl adjustment
+            wl_nodelabels = homsub_format_wl_nodelabels(graphs, vertex_features=None, n_iter=-pattern_count)
+            wl_representations = np.array([np.sum(g, axis=0) for g in wl_nodelabels])
 
         kt_list, td_list = get_pattern_list(size, 1)
         hom_representations = min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
@@ -203,7 +211,13 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
         while comparison < 0:
             kt_list, td_list = get_pattern_list(size, 1)
             hom_representations = np.hstack([hom_representations, min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)])
-            comparison_new = compare_equivalence_classes(hom_representations, wl_representations)
+
+            if metadata is not None:
+                hom_comp_reps = hom_representations[train_idx, :]
+            else:
+                hom_comp_reps = hom_representations
+
+            comparison_new = compare_equivalence_classes(hom_comp_reps, wl_representations)
             if comparison_new <= comparison:
                 stop_step += 1
             else:
@@ -214,7 +228,7 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
                 break
 
 
-        print(f'NOTE hom representations have shape {hom_representations.shape} to be as powerful as wl with n_iter={-pattern_count}.\n  wl has {np.unique(wl_representations, axis=0).shape[0]} unique reps, hom has {np.unique(hom_representations, axis=0).shape[0]} unique reps')
+        print(f'NOTE hom representations have shape {hom_representations.shape} to be as powerful as wl with n_iter={-pattern_count} (shape={wl_representations.shape}).\n  wl has {np.unique(wl_representations, axis=0).shape[0]} unique reps, hom has {np.unique(hom_representations, axis=0).shape[0]} unique reps')
         return hom_representations
 
 def product_graph_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, **kwargs):
