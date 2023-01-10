@@ -25,15 +25,16 @@ def read(*names, **kwargs):
 
 setup(
     name='ghc',
-    version='0.1.1',
+    version='0.2',
     license='MIT',
     description='A prototype for graph homomorphism convolution.',
     author='Pascal Welke, Hoang NT',
-    author_email='me@gearons.org',
+    author_email='welke@cs.uni-bonn.de',
     url='https://github.com/pwelke/graph-homomorphism-network',
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
+    py_modules=[splitext(basename(path))[0] for path in glob(join('src', '*.py'))],
+    data_files=[('ghc/utils', ['src/ghc/utils/logprimes1.npy'])],
     include_package_data=True,
     zip_safe=False,
     keywords=[
