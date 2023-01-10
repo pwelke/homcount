@@ -12,14 +12,6 @@ from ghc.utils.ml import accuracy
 import sys
 import json
 
-def save_json(X, dataset, hom_type, hom_size, pattern_count, run_id, dloc):
-    js = {'vertices': 1, 'edges': 1, 'counts': [1,2,3], 'idx': 0, 'split': 'train'}
-    dataf = os.path.abspath(dloc)
-    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.homson"
-    with open(tmp_str, 'wb') as f:
-        for x in X:
-            pass
-
 def load_data_for_json(fname, dloc):
     graphs, feats, y = load_data(fname, dloc)
     name = os.path.abspath(os.path.join(dloc, fname + '.meta'))
@@ -35,10 +27,9 @@ def hom2json(metas, homX, ys):
 
 def save_json(meta, dataset, hom_type, hom_size, pattern_count, run_id, dloc):
     dataf = os.path.abspath(dloc)
-    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.hom"
+    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.homson"
     with open(tmp_str, 'w') as f:
         json.dump(meta, f)
-
 
 if __name__ == "__main__":
 
