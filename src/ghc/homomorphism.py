@@ -1,5 +1,5 @@
 from ghc.utils.hom import nx2homg, tree_list, cycle_list, path_list, hom_profile, tree_list_random
-from ghc.generate_k_tree import partial_ktree_sample, Nk_strategy, product_graph_ktree_profile
+from ghc.generate_k_tree import partial_ktree_sample, Nk_strategy, product_graph_ktree_profile, min_kernel, full_kernel
 import homlib as hl
 import networkx as nx
 import numpy as np
@@ -167,6 +167,10 @@ def get_hom_profile(f_str):
         return random_tree_profile  
     elif f_str == "random_ktree":
         return random_ktree_profile
+    elif f_str == "min_kernel":
+        return min_kernel
+    elif f_str == "full_kernel":
+        return full_kernel
     elif f_str == "path":
         return path_profile
     elif f_str == "cycle":
@@ -179,4 +183,6 @@ def get_hom_profile(f_str):
         return product_graph_ktree_profile        
     else:  # Return all posible options
         return ["labeled_tree", "labeled_tree_exp",
-                "tree", "random_tree", "path", "cycle", "tree+cycle", "atlas", "random_ktree", "product_graph_ktree_profile"]
+                "tree", "random_tree", "path", "cycle", 
+                "tree+cycle", "atlas", "random_ktree", 
+                "product_graph_ktree_profile", "min_kernel", "full_kernel"]

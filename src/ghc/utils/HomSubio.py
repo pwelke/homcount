@@ -13,8 +13,15 @@ import re
 
 def HomSub(pattern_list, graph_list, td_list, verbose=False, min_embedding=False):
     '''Compute homomorphism counts for a batch of patterns and a batch of 
-    (transaction) graphs using HomSub. For each pattern-transaction pair, we call HomSub
-    anew.
+    (transaction) graphs using HomSub. For each pattern-transaction pair selected for 
+    computation, we call HomSub anew.
+
+    min_embedding: If True, for each (transaction) graph, we use only those patterns that
+        have smaller or equal size. This implements the min-kernel as 
+        descibed in the paper. 
+        If False, for each (transaction) graph, we compute the hom counts for all 
+        patterns. This implements a standard kernel which is likely useful 
+        for feeding into an MLP
 
     Files which are used to communicate data between Python and HomSub
     are written to a temp folder. '''

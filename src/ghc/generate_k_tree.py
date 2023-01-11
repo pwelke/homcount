@@ -123,15 +123,19 @@ def Nk_strategy_poisson(max_size, pattern_count, lam='by_max'):
     return sizes, treewidths
 
 
-def Nk_strategy_fiddly(max_size, pattern_count, lam='by_max'):
+def Nk_strategy_fiddly(max_size, pattern_count, lam='by_max', min_size=0):
 
+    # we want to be polynomial time in expectation
     if lam == 'by_max':
         lam = (1. + np.log(max_size)) / max_size
 
-    # draw sizes from uniform distribution
-    sizes = np.random.default_rng().geometric(p=0.1, size=pattern_count) #randint(2, max_size+1, size=pattern_count)
+    # we want the patterns to be at most max_size with probability .99
+    p = 1 - np.power(0.01, max_size - min_size)
 
-    # draw treewidths from geometric distribution, but bounded by size - 1
+    # draw sizes from geometric distribution
+    sizes = np.random.default_rng().geometric(p=p, size=pattern_count) + min_size
+
+    # draw treewidths from poisson distribution, but bounded by size - 1
     treewidths = np.random.randint(1, 4, size=pattern_count) + np.random.default_rng().poisson(lam=lam, size=pattern_count)
     treewidths = np.where(treewidths<sizes-1, treewidths, sizes - 1)
 
@@ -142,18 +146,32 @@ def Nk_strategy_fiddly(max_size, pattern_count, lam='by_max'):
 Nk_strategy = Nk_strategy_fiddly
 
 
-def min_embedding(pattern_list, graph_list, td_list):
-    '''For each (transaction) graph, we use only those patterns that
-    have smaller or equal size. This implements the min-kernel as 
-    descibed in the paper. 
-    '''
+# def min_embedding(pattern_list, graph_list, td_list):
+#     '''For each (transaction) graph, we use only those patterns that
+#     have smaller or equal size. This implements the min-kernel as 
+#     descibed in the paper. 
+#     '''
+#     min_embeddings = HomSub(pattern_list, graph_list, td_list=td_list, min_embedding=True)
+#     return min_embeddings
 
-    min_embeddings = HomSub(pattern_list, graph_list, td_list=td_list, min_embedding=True)
+# def full_embedding(pattern_list, graph_list, td_list):
+#     '''For each (transaction) graph, we compute the hom counts for all 
+#     patterns. This implements a standard kernel which is likely useful 
+#     for feeding into an MLP.
+#     '''
+#     full_embeddings = HomSub(pattern_list, graph_list, td_list=td_list, min_embedding=False)
+#     return full_embeddings
 
-    return min_embeddings
+
+def get_small_patterns():
+    singleton, td_singleton = partial_ktree_sample(N=1, k=0, p=1)
+    edge, td_edge = partial_ktree_sample(N=2, k=1, p=1)
+    path, td_path = partial_ktree_sample(N=3, k=1, p=1)
+    tria, td_tria = partial_ktree_sample(N=3, k=2, p=1)
+    return [singleton, edge, path, tria], [td_singleton, td_edge, td_path, td_tria]
 
 
-def get_pattern_list(size, pattern_count):
+def get_pattern_list(size, pattern_count, min_size=0):
     
     # tw_downweighting_p = 0.35
     partial_ktree_edge_keeping_p = 0.9
@@ -175,19 +193,40 @@ def get_pattern_list(size, pattern_count):
     return kt_list, td_list
 
 
-def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
+def min_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
+    return random_ktree_profile(graphs, size=size, density=density, seed=seed, pattern_count=pattern_count, early_stopping=early_stopping, metadata=metadata, pattern_file=pattern_file,
+                                # this is what we really fix for the min_kernel
+                                min_embedding=True, add_small_patterns=True, **kwargs)
+
+def full_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
+    return random_ktree_profile(graphs, size=size, density=density, seed=seed, pattern_count=pattern_count, early_stopping=early_stopping, metadata=metadata, pattern_file=pattern_file,
+                                # this is what we really fix for the min_kernel
+                                min_embedding=False, add_small_patterns=True, **kwargs)
+
+def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, min_embedding=True, add_small_patterns=False, pattern_file=None, **kwargs):
 
     if size == 'max':
         size = max([len(g.nodes) for g in graphs])
 
+    if add_small_patterns:
+        min_pattern_size = 4
+    else:
+        min_pattern_size = 0
+
+
     if pattern_count > -1:
         # return the requested number of patterns
-        kt_list, td_list = get_pattern_list(size, pattern_count)
+        kt_list, td_list = get_pattern_list(size, pattern_count, min_size=min_pattern_size)
+
+        if add_small_patterns:
+            kt_small, td_small = get_small_patterns()
+            kt_list += kt_small
+            td_list += td_small
 
         if pattern_file is not None:
             pickle.dump(kt_list, pattern_file)
 
-        return min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
+        return HomSub(pattern_list=kt_list, graph_list=graphs, td_list=td_list, min_embedding=min_embedding)
     
     else:
         # adjust pattern count wrt. expressive power on input data. the negative number gives the n_iter of wl
@@ -210,17 +249,29 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
             wl_nodelabels = homsub_format_wl_nodelabels(graphs, vertex_features=None, n_iter=-pattern_count)
             wl_representations = np.array([np.sum(g, axis=0) for g in wl_nodelabels])
 
-        kt_list, td_list = get_pattern_list(size, 1)
-        pattern_list += kt_list
-        hom_representations = min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
+        if add_small_patterns:
+            kt_list, td_list = get_small_patterns()
+            pattern_list += kt_list
+            hom_representations = HomSub(pattern_list=kt_list, graph_list=graphs, td_list=td_list, min_embedding=min_embedding)
+            if metadata is not None:
+                hom_comp_reps = hom_representations[train_idx, :]
+            else:
+                hom_comp_reps = hom_representations
+            comparison = compare_equivalence_classes(hom_comp_reps, wl_representations)
+        else:
+            hom_representations = None
+            comparison = -1
 
-        comparison = -1
         stop_step = 0
         while comparison < 0:
 
-            kt_list, td_list = get_pattern_list(size, 1)
+            kt_list, td_list = get_pattern_list(size, 1, min_size=min_pattern_size)
             pattern_list += kt_list
-            hom_representations = np.hstack([hom_representations, min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)])
+            new_emb = HomSub(pattern_list=kt_list, graph_list=graphs, td_list=td_list, min_embedding=min_embedding)
+            if hom_representations is None:
+                hom_representations = new_emb
+            else:
+                hom_representations = np.hstack([hom_representations, new_emb])
 
             if metadata is not None:
                 hom_comp_reps = hom_representations[train_idx, :]
