@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from ghc.homomorphism import get_hom_profile
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
-                           load_folds, augment_data
+                           load_folds, augment_data, precompute_patterns_file_handle
 from ghc.utils.ml import accuracy
 import sys
 import json
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
                         os.path.join(args.dloc, "precompute"))
 
-    metas = hom2json(metas, homX, y)
-    save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                        os.path.join(args.dloc, "precompute"))
+        metas = hom2json(metas, homX, y)
+        save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+                            os.path.join(args.dloc, "precompute"))
     
