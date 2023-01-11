@@ -35,10 +35,23 @@ def save_precompute(X, dataset, hom_type, hom_size, pattern_count, run_id, dloc)
     with open(tmp_str, 'wb') as f:
         pkl.dump(X, f)
 
+def precompute_patterns_file_handle(dataset, hom_type, hom_size, pattern_count, run_id, dloc):
+    dataf = os.path.abspath(dloc)
+    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.patterns"
+    return open(tmp_str, 'wb')
+
+
 
 def load_precompute(dataset, hom_type, hom_size, pattern_count, run_id, dloc):
     dataf = os.path.abspath(dloc)
     tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.hom"
+    with open(tmp_str, 'rb') as f:
+        X = pkl.load(f)
+    return X
+
+def load_precompute_patterns(dataset, hom_type, hom_size, pattern_count, run_id, dloc):
+    dataf = os.path.abspath(dloc)
+    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.patterns"
     with open(tmp_str, 'rb') as f:
         X = pkl.load(f)
     return X

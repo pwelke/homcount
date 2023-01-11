@@ -86,7 +86,15 @@ if __name__ == "__main__":
 
     except FileNotFoundError:
         # changed it to batch computation to not recompute the patterns each time
-        homX = hom_func(graphs, density=False, seed=args.seed, pattern_count=args.pattern_count, pattern_size=args.hom_size, metadata=metas)
+        with precompute_patterns_file_handle(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+                        os.path.join(args.dloc, "precompute")) as f:
+            homX = hom_func(graphs, 
+                            size=args.hom_size, 
+                            density=False, 
+                            seed=args.seed, 
+                            pattern_count=args.pattern_count, 
+                            pattern_file=f,
+                            )
         save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
                         os.path.join(args.dloc, "precompute"))
 

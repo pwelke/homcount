@@ -7,6 +7,7 @@ from ghc.utils.fast_weisfeiler_lehman import *
 import numpy as np
 import scipy.spatial.distance as sp
 from tqdm import tqdm
+import pickle
 
 
 def random_ktree_decomposition(N, k, seed=None):
@@ -174,7 +175,7 @@ def get_pattern_list(size, pattern_count):
     return kt_list, td_list
 
 
-def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, **kwargs):
+def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
 
     if size == 'max':
         size = max([len(g.nodes) for g in graphs])
@@ -182,10 +183,15 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
     if pattern_count > -1:
         # return the requested number of patterns
         kt_list, td_list = get_pattern_list(size, pattern_count)
+
+        if pattern_file is not None:
+            pickle.dump(kt_list, pattern_file)
+
         return min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
     
     else:
         # adjust pattern count wrt. expressive power on input data. the negative number gives the n_iter of wl
+        pattern_list = list()
 
         if metadata is not None:
             # we know the training split 
@@ -205,11 +211,15 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
             wl_representations = np.array([np.sum(g, axis=0) for g in wl_nodelabels])
 
         kt_list, td_list = get_pattern_list(size, 1)
+        pattern_list += kt_list
         hom_representations = min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)
+
         comparison = -1
         stop_step = 0
         while comparison < 0:
+
             kt_list, td_list = get_pattern_list(size, 1)
+            pattern_list += kt_list
             hom_representations = np.hstack([hom_representations, min_embedding(pattern_list=kt_list, graph_list=graphs, td_list=td_list)])
 
             if metadata is not None:
@@ -229,6 +239,8 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
 
 
         print(f'NOTE hom representations have shape {hom_representations.shape} to be as powerful as wl with n_iter={-pattern_count} (shape={wl_representations.shape}).\n  wl has {np.unique(wl_representations, axis=0).shape[0]} unique reps, hom has {np.unique(hom_representations, axis=0).shape[0]} unique reps')
+        if pattern_file is not None:
+            pickle.dump(pattern_list, pattern_file)
         return hom_representations
 
 def product_graph_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, **kwargs):

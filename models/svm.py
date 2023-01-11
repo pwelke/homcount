@@ -2,8 +2,11 @@ import argparse
 import numpy as np
 from tqdm import tqdm
 from time import time
+import sys
+sys.path.append('graph-homomorphism-network/src')
+
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
-                           load_folds, create_folds, augment_data
+                           load_folds, create_folds, augment_data, precompute_patterns_file_handle
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, accuracy_score
@@ -80,7 +83,7 @@ if __name__ == "__main__":
     #### Setup checkpoints and precompute
     os.makedirs("./checkpoints/", exist_ok=True)
     os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
-   
+
     #### Load data and compute homomorphism
     # the middle parameter loads graph feature info and is ignored, for now
     graphs, _, y = load_data(args.data.upper(), args.dloc)
@@ -101,7 +104,15 @@ if __name__ == "__main__":
 
     except FileNotFoundError:
         # changed it to batch computation to not recompute the patterns each time
-        homX = hom_func(graphs, size=args.hom_size, density=False, seed=args.seed, pattern_count=args.pattern_count)
+        with precompute_patterns_file_handle(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+                        os.path.join(args.dloc, "precompute")) as f:
+            homX = hom_func(graphs, 
+                            size=args.hom_size, 
+                            density=False, 
+                            seed=args.seed, 
+                            pattern_count=args.pattern_count, 
+                            pattern_file=f,
+                            )
         save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
                         os.path.join(args.dloc, "precompute"))
 
