@@ -5,6 +5,7 @@ import numpy as np
 import random
 import os
 import random
+import json
 from itertools import repeat
 from sklearn.model_selection import KFold
 from homlib import Graph as hlGraph
@@ -40,6 +41,25 @@ def precompute_patterns_file_handle(dataset, hom_type, hom_size, pattern_count, 
     tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.patterns"
     return open(tmp_str, 'wb')
 
+
+def load_data_for_json(fname, dloc):
+    graphs, feats, y = load_data(fname, dloc)
+    name = os.path.abspath(os.path.join(dloc, fname + '.meta'))
+    with open(name, 'r') as f:
+        metas = json.load(f)
+    return graphs, feats, y, metas
+
+def hom2json(metas, homX, ys):
+    for meta, hom, y in zip(metas, homX, ys):
+        meta['counts'] = hom.tolist()
+        meta['y'] = y
+    return metas
+
+def save_json(meta, dataset, hom_type, hom_size, pattern_count, run_id, dloc):
+    dataf = os.path.abspath(dloc)
+    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.homson"
+    with open(tmp_str, 'w') as f:
+        json.dump(meta, f)
 
 
 def load_precompute(dataset, hom_type, hom_size, pattern_count, run_id, dloc):
