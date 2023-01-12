@@ -207,6 +207,9 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
 
     if size == 'max':
         size = max([len(g.nodes) for g in graphs])
+    
+    if size == 'half_max':
+        size = max([len(g.nodes) for g in graphs]) / 2
 
     if add_small_patterns:
         min_pattern_size = 4
