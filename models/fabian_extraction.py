@@ -5,13 +5,13 @@ import pickle as pkl
 from time import time
 import numpy as np
 from tqdm import tqdm
-# import sys
-# sys.path.append('graph-homomorphism-network/src')
+import sys
+sys.path.append('graph-homomorphism-network/src')
 
 from ghc.homomorphism import get_hom_profile
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, augment_data, precompute_patterns_file_handle,\
-                           load_data_for_json, hom2json, save_json
+                           load_data_for_json, hom2json, save_json, load_precompute_patterns
 from ghc.utils.ml import accuracy
 import sys
 
@@ -84,6 +84,9 @@ if __name__ == "__main__":
                         os.path.join(args.dloc, "precompute"))
 
         metas = hom2json(metas, homX, y)
+        pattern_sizes = [len(p.nodes) for p in load_precompute_patterns(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+                        os.path.join(args.dloc, "precompute"))]
+        metas = {'pattern_sizes': pattern_sizes, 'data': metas}
         save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                            os.path.join(args.dloc, "precompute"))
+                        os.path.join(args.dloc, "precompute"))
     
