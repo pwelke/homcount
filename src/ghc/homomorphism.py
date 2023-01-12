@@ -5,6 +5,8 @@ import networkx as nx
 import numpy as np
 # from ghc.utils.DISCio import DISChom
 from ghc.generate_k_tree import random_ktree_profile
+import pickle
+
 
 def hom_tree(F, G):
     """Specialized tree homomorphism in Python (serializable).
@@ -142,14 +144,18 @@ def explabeled_tree_profile(G, size=6, node_tags=None, **kwargs):
     return np.concatenate(hom_list)
 
 
-def homomorphism_profile(graphs, size=6, node_tags=None, **kwargs):
+def homomorphism_profile(graphs, size=6, node_tags=None, pattern_file=None, **kwargs):
     """Run profile for exponentially labeled trees."""
     t_list = hom_profile(size)
+
+    if pattern_file is not None:
+        pickle.dump(t_list, pattern_file)
 
     embeddings = np.zeros([len(graphs), len(t_list)])
     for i, G in enumerate(graphs):
         for j, H in enumerate(t_list):
             hom_list = hom(H, G) 
+            embeddings[i,j] = hom_list
 
     return embeddings
 
