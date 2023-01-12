@@ -130,7 +130,7 @@ def Nk_strategy_fiddly(max_size, pattern_count, lam='by_max', min_size=0):
         lam = (1. + np.log(max_size)) / max_size
 
     # we want the patterns to be at most max_size with probability .99
-    p = 1 - np.power(0.01, max_size - min_size)
+    p = 1 - np.power(0.01, 1. / (max_size - min_size))
 
     # draw sizes from geometric distribution
     sizes = np.random.default_rng().geometric(p=p, size=pattern_count) + min_size
