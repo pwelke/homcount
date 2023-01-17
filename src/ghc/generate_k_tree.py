@@ -194,14 +194,58 @@ def get_pattern_list(size, pattern_count, min_size=0):
 
 
 def min_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
-    return random_ktree_profile(graphs, size=size, density=density, seed=seed, pattern_count=pattern_count, early_stopping=early_stopping, metadata=metadata, pattern_file=pattern_file,
+    patterns = random_ktree_profile(graphs, size=size, density=density, seed=seed, pattern_count=pattern_count, early_stopping=early_stopping, metadata=metadata, pattern_file=pattern_file,
                                 # this is what we really fix for the min_kernel
                                 min_embedding=True, add_small_patterns=True, **kwargs)
+    # patterns = filter_overflow(patterns)
+    return patterns
+
 
 def full_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
-    return random_ktree_profile(graphs, size=size, density=density, seed=seed, pattern_count=pattern_count, early_stopping=early_stopping, metadata=metadata, pattern_file=pattern_file,
+    patterns = random_ktree_profile(graphs, size=size, density=density, seed=seed, pattern_count=pattern_count, early_stopping=early_stopping, metadata=metadata, pattern_file=pattern_file,
                                 # this is what we really fix for the min_kernel
                                 min_embedding=False, add_small_patterns=True, **kwargs)
+    # patterns = filter_overflow(patterns)
+    return patterns
+
+
+def large_pattern(graphs, **kwargs):
+
+    # return the requested number of patterns
+    kt_list, td_list = partial_ktree_sample(100, 1, 0.0)
+
+    patterns = HomSub(pattern_list=[kt_list], graph_list=graphs, td_list=[td_list], min_embedding=False)
+    # patterns = filter_overflow(patterns)
+    return patterns
+
+
+def filter_overflow(patterns):
+    minval = np.min(patterns, axis=0)
+    patterns = patterns[:, minval >= 0]
+    if patterns.shape[1] > 0:
+        return patterns
+    else: 
+        # if nothing worked, return zeros
+        return np.zeros([patterns.shape[0], 1])
+
+# def min_kernel_no_overflow(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
+#     patterns = min_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs)
+#     patterns = filter_overflow(patterns)
+#     return patterns
+
+# def full_kernel_no_overflow(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
+#     patterns = full_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs)
+#     patterns = filter_overflow(patterns)
+#     return patterns
+
+# def large_pattern_no_overflow(graphs, **kwargs):
+#     patterns = large_pattern(graphs, kwargs)
+#     patterns = filter_overflow(patterns)
+#     return patterns
+    
+
+
+
 
 def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, min_embedding=True, add_small_patterns=False, pattern_file=None, **kwargs):
 
@@ -223,8 +267,8 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
 
         if add_small_patterns:
             kt_small, td_small = get_small_patterns()
-            kt_list += kt_small
-            td_list += td_small
+            kt_list = kt_small + kt_list
+            td_list = td_small + td_list
 
         if pattern_file is not None:
             pickle.dump(kt_list, pattern_file)

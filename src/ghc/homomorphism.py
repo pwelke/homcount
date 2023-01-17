@@ -4,7 +4,8 @@ import homlib as hl
 import networkx as nx
 import numpy as np
 # from ghc.utils.DISCio import DISChom
-from ghc.generate_k_tree import random_ktree_profile
+from ghc.generate_k_tree import random_ktree_profile, large_pattern, min_kernel, full_kernel
+                # large_pattern_no_overflow, min_kernel_no_overflow, full_kernel_no_overflow
 import pickle
 
 
@@ -177,12 +178,20 @@ def get_hom_profile(f_str):
         return min_kernel
     elif f_str == "full_kernel":
         return full_kernel
+    # elif f_str == "min_kernel_no_overflow":
+    #     return min_kernel_no_overflow
+    # elif f_str == "full_kernel_no_overflow":
+    #     return full_kernel_no_overflow
     elif f_str == "path":
         return path_profile
     elif f_str == "cycle":
         return cycle_profile
     elif f_str == "tree+cycle":
         return homomorphism_profile
+    elif f_str == 'large_pattern':
+        return large_pattern
+    # elif f_str == 'large_pattern_no_overflow':
+    #     return large_pattern_no_overflow
     elif f_str == "atlas":
         return atlas_profile
     elif f_str == 'product_graph_ktree_profile':
@@ -191,4 +200,4 @@ def get_hom_profile(f_str):
         return ["labeled_tree", "labeled_tree_exp",
                 "tree", "random_tree", "path", "cycle", 
                 "tree+cycle", "atlas", "random_ktree", 
-                "product_graph_ktree_profile", "min_kernel", "full_kernel"]
+                "product_graph_ktree_profile", "min_kernel", "full_kernel", 'large_pattern']
