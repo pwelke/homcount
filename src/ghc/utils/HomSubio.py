@@ -75,8 +75,12 @@ def HomSub(pattern_list, graph_list, td_list, verbose=False, min_embedding=False
                     sys.stderr.write(f'{e}')
                     features.write('-1\n')
 
-
-    hom_counts = np.loadtxt(os.path.join(graph_directory, 'features.csv')).reshape([ngraphs, npatterns])
+    # homcounts get large. HomSub uses long long int, 
+    # but it's unclear how large this is on any given system. 
+    # so we use int128, as we use this lateron anyways.
+    # note that hom_counts might still contain overflowed values from HomSub
+    # filter at your own expense.
+    hom_counts = np.loadtxt(os.path.join(graph_directory, 'features.csv'), dtype=np.int64).reshape([ngraphs, npatterns])
 
     # return everything
     return hom_counts
