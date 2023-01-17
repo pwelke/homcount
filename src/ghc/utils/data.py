@@ -55,11 +55,18 @@ def hom2json(metas, homX, ys):
         meta['y'] = y
     return metas
 
-def save_json(meta, dataset, hom_type, hom_size, pattern_count, run_id, dloc):
+def save_json(meta, dataset, hom_type, hom_size, pattern_count, run_id, dloc, suffix='homson'):
     dataf = os.path.abspath(dloc)
-    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.homson"
+    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.{suffix}"
     with open(tmp_str, 'w') as f:
         json.dump(meta, f)
+
+def load_json(dataset, hom_type, hom_size, pattern_count, run_id, dloc, suffix='homson'):
+    dataf = os.path.abspath(dloc)
+    tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.{suffix}"
+    with open(tmp_str, 'r') as f:
+        X = json.load(f)
+    return X
 
 
 def load_precompute(dataset, hom_type, hom_size, pattern_count, run_id, dloc):
