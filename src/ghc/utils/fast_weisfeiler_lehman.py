@@ -28,35 +28,8 @@ def compress_int(labels: np.array):
     _, inv = np.unique(labels, return_inverse=True)
     return inv
 
+
 def homsub_format_wl_nodelabels(graphs, vertex_features, n_iter):
-    return homsub_format_wl_nodelabels_nx(graphs, vertex_features, n_iter)
-
-def homsub_format_wl_nodelabels_nx(graphs, vertex_features, n_iter):
-    
-    G = nx.disjoint_union_all(graphs)
-    
-    if vertex_features is not None:
-        v = np.vstack(vertex_features)
-        vv = from_onehot(v)
-    else:
-        vv = None
-
-    adj = nx.to_scipy_sparse_matrix(G)
-
-    wl_labels = wl_direct_scipysparse(adj, vertex_labels=vv, n_iter=n_iter)
-
-    oh = to_onehot(compress_int(wl_labels))
-
-    wl_features = list()
-    i = 0
-    for g in graphs:
-        n = g.number_of_nodes()
-        wl_features.append(oh[i:i+n, :])
-        i += n
-
-    return wl_features
-
-def homsub_format_wl_nodelabels_scipy(graphs, vertex_features, n_iter):
     
     adj = sparse.block_diag([nx.to_scipy_sparse_matrix(g) for g in graphs], format='csr')
     
@@ -65,8 +38,6 @@ def homsub_format_wl_nodelabels_scipy(graphs, vertex_features, n_iter):
         vv = from_onehot(v)
     else:
         vv = None
-
-    # adj = nx.to_scipy_sparse_matrix(G)
 
     wl_labels = wl_direct_scipysparse(adj, vertex_labels=vv, n_iter=n_iter)
 
@@ -113,26 +84,3 @@ def compare_equivalence_classes(hom_features, wl_features):
     # not yet really what we want, but simple
     return diff
 
-
-def test_homsub_format_wl_nodelabels(n_patterns=10, n_iter=2):
-    import time
-    from ghc.generate_k_tree import get_small_patterns, get_pattern_list
-
-    ps, _ = get_pattern_list(30, n_patterns)
-
-    tic = time.time()
-    a = homsub_format_wl_nodelabels_nx(ps, None, n_iter)
-    print(f'for n_patterns={n_patterns} nx took {time.time() - tic}')
-    
-    tic = time.time()
-    b = homsub_format_wl_nodelabels_scipy(ps, None, n_iter)
-    print(f'for n_patterns={n_patterns} sp took {time.time() - tic}')
-
-    for g, h in zip(a, b):
-        if not np.array_equal(g,h):
-            print('issue!')
-            break
-
-if __name__ == '__main__':
-    for i in range(10):
-        test_homsub_format_wl_nodelabels(n_patterns=(i+1)*100)
