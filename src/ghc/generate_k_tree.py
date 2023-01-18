@@ -228,24 +228,6 @@ def filter_overflow(patterns):
         # if nothing worked, return zeros
         return np.zeros([patterns.shape[0], 1])
 
-# def min_kernel_no_overflow(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
-#     patterns = min_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs)
-#     patterns = filter_overflow(patterns)
-#     return patterns
-
-# def full_kernel_no_overflow(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
-#     patterns = full_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs)
-#     patterns = filter_overflow(patterns)
-#     return patterns
-
-# def large_pattern_no_overflow(graphs, **kwargs):
-#     patterns = large_pattern(graphs, kwargs)
-#     patterns = filter_overflow(patterns)
-#     return patterns
-    
-
-
-
 
 def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, min_embedding=True, add_small_patterns=False, pattern_file=None, **kwargs):
 
@@ -304,7 +286,7 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
                 hom_comp_reps = hom_representations[train_idx, :]
             else:
                 hom_comp_reps = hom_representations
-            comparison = compare_equivalence_classes(hom_comp_reps, wl_representations)
+            comparison = compare_equivalence_classes(filter_overflow(hom_comp_reps), wl_representations)
         else:
             hom_representations = None
             comparison = -1
@@ -325,7 +307,7 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
             else:
                 hom_comp_reps = hom_representations
 
-            comparison_new = compare_equivalence_classes(hom_comp_reps, wl_representations)
+            comparison_new = compare_equivalence_classes(filter_overflow(hom_comp_reps), wl_representations)
             if comparison_new <= comparison:
                 stop_step += 1
             else:
