@@ -11,7 +11,7 @@ from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, accuracy_score
 from ghc.homomorphism import get_hom_profile, random_tree_profile
-from ghc.generate_k_tree import random_ktree_profile
+from ghc.generate_k_tree import random_ktree_profile, filter_overflow
 
 from sklearn.preprocessing import StandardScaler
 import os
@@ -117,7 +117,8 @@ if __name__ == "__main__":
                         os.path.join(args.dloc, "precompute"))
 
 
-    X = np.array(homX)
+    X = filter_overflow(np.array(homX))
+
     
     # Train SVC 
     svm_time = time()

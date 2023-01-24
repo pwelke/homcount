@@ -22,6 +22,10 @@ from mlp import MLP
 
 
 if __name__ == '__main__':
+
+    # not up to date
+    raise DeprecationWarning()
+
     hom_types = get_hom_profile(None)
 
     params_grid = {

@@ -12,7 +12,7 @@ from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from tqdm import tqdm
 from ghc.homomorphism import get_hom_profile, random_tree_profile
-from ghc.generate_k_tree import random_ktree_profile
+from ghc.generate_k_tree import random_ktree_profile, filter_overflow
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, create_folds, augment_data
 from ghc.utils.ml import accuracy
@@ -128,6 +128,8 @@ if __name__ == "__main__":
         save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
                         os.path.join(args.dloc, "precompute"))
     
+    homX = filter_overflow(homX)
+
     tensor_gen_X = None
     tensor_gen_y = None
     tensorX = torch.Tensor(homX).float().to(device)

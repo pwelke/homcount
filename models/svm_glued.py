@@ -7,7 +7,7 @@ from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, accuracy_score
 from ghc.homomorphism import get_hom_profile, random_tree_profile
-from ghc.generate_k_tree import random_ktree_profile
+from ghc.generate_k_tree import random_ktree_profile, filter_overflow
 from ghc.utils.fast_weisfeiler_lehman import homsub_format_wl_nodelabels
 
 from sklearn.preprocessing import StandardScaler
@@ -130,6 +130,7 @@ if __name__ == "__main__":
     wl_label_counts = np.array([np.sum(g, axis=0) for g in wl_labels])
     
     X = np.hstack([np.array(homX), vertex_label_counts, wl_label_counts])
+    X = filter_overflow(X)
     
     # Train SVC 
     svm_time = time()
