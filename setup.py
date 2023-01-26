@@ -30,7 +30,7 @@ setup(
     description='A prototype for graph homomorphism convolution.',
     author='Anonymized',
     author_email='anonymous@somewhere',
-    url='https://anonymous.4open.science/r/HomCount_GNNs_ICML_2023',
+    url='https://anonymous.4open.science/r/HomCount_countingfork_ICML_2023',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob(join('src', '*.py'))],
