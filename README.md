@@ -4,7 +4,7 @@
 Our code to sample patterns and then count homomorphisms started as a fork
 of the [code for the Graph Homomorphism Convolution](https://github.com/gear/graph-homomorphism-network) paper. 
 
-Below, you can find the original README of that repository, but be aware that we have changed quite a few things, in particular `mlp.py` and `svm.py`.
+Below, you can find the original README of that repository, but be aware that we have changed quite a few things, in particular `mlp.py` and `svm.py`, as well as large parts of the ghc package.
 
 
 ## Graph Homomorphism Convolution
