@@ -8,12 +8,6 @@ import random
 import json
 from itertools import repeat
 from sklearn.model_selection import KFold
-# from homlib import Graph as hlGraph
-
-
-ALL_DATA = ["MUTAG", "PTC_MR", "IMDBBINARY", "IMDBMULTI", "NCI1", "PROTEINS",
-            "REDDIT-BINARY", "REDDIT-MULTI-5K", "REDDIT-MULTI-12K", "COLLAB",
-            "DD", "ENZYMES", "NCI109", "BZR", "COX2", "BZR_MD", "COX2_MD"]
 
 
 def to_onehot(y, nmax=None):
@@ -68,7 +62,6 @@ def load_json(dataset, hom_type, hom_size, pattern_count, run_id, dloc, suffix='
         X = json.load(f)
     return X
 
-
 def load_precompute(dataset, hom_type, hom_size, pattern_count, run_id, dloc):
     dataf = os.path.abspath(dloc)
     tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.hom"
@@ -82,62 +75,6 @@ def load_precompute_patterns(dataset, hom_type, hom_size, pattern_count, run_id,
     with open(tmp_str, 'rb') as f:
         X = pkl.load(f)
     return X
-
-
-# def nx2homg(nxg):
-#     """Convert nx graph to homlib graph format. Only
-#     undirected graphs are supported.
-#     Note: This function expects nxg to have consecutive integer index."""
-#     n = nxg.number_of_nodes()
-#     G = hlGraph(n)
-#     for (u, v) in nxg.edges():
-#         G.addEdge(u,v)
-#     return G
-
-
-#def _swap_edges(g, num_swap):
-#    edges = list(g.edges)
-#    nodes = list(g.nodes)
-#    upper = nodes[:int(g.number_of_nodes()/2)]
-#    lower = nodes[int(g.number_of_nodes()/2):]
-#    to_change = [random.choice(edges) for _ in range(num_swap)]
-#    g.remove_edges_from(to_change)
-#    for _ in range(num_swap):
-#        u, v = 0, 0
-#        if random.random() > 0.5:
-#            sampler = upper
-#        else:
-#            sampler = lower
-#        while u == v:
-#            u = random.choice(sampler)
-#            v = random.choice(sampler)
-#        g.add_edge(u,v)
-#    return g
-
-
-#def gen_bipartite(num_graphs=200, perm_frac=0.0, p=0.2):
-#    """Generate bipartite and non-bipartite graphs."""
-#    bipartites = []
-#    nonbipartites = []
-#    for i in range(num_graphs):
-#        num_nodes = np.random.randint(40,101)
-#        g = nx.bipartite.generators.random_graph(num_nodes,num_nodes, p)
-#        if perm_frac > 0:
-#            num_swap = int(perm_frac * g.number_of_edges())
-#            g = _swap_edges(g, num_swap)
-#        bipartites.append(g)
-#        num_nodes = np.random.randint(40,101)
-#        g = nx.generators.erdos_renyi_graph(2*num_nodes, p/2)
-#        nonbipartites.append(g)  # Not 100% fix later
-
-#    g_list = []
-#    for i, g in enumerate(bipartites+nonbipartites):
-#        g = S2VGraph(g, y[i], node_tags=None, 
-#                     node_features=None, graph_feature=None)
-#        g_list.append(g)
-#    nclass = 2
-#    return g_list, nclass
-
 
 def load_data(dname, dloc):
     """Load datasets"""
@@ -177,21 +114,6 @@ def create_folds(dname, dloc, X):
         pkl.dump(splits, file=f)
     return splits
 
-
-#def drop_nodes(graphs, X, y, per_graph=2, rate=0.1):
-#    generated_graphs = []
-#    for i, g in enumerate(graphs):
-#        n = g.number_of_nodes()
-#        for _ in range(per_graph):
-#            ng = g.copy()
-#            droplist = np.random.choice(ng.nodes(),
-#                                        size=int(rate*n),
-#                                        replace=False)
-#            ng.remove_nodes_from(droplist)
-#            #### Reindexing
-#            mapping = dict([(i, j) for j, i in enumerate(ng.nodes())])
-
-
 def drop_nodes(graph, x, rate=1):
     #### Remove nodes
     n = graph.number_of_nodes()
@@ -207,7 +129,6 @@ def drop_nodes(graph, x, rate=1):
     ng = nx.relabel_nodes(ng, mapping=mapping)
     newx = x[list(mapping.keys()), :]
     return ng, newx
-
 
 def augment_data(graphs, X, y, samples_per_graph, rate=1):
     new_graphs = []

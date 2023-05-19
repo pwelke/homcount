@@ -146,23 +146,6 @@ def Nk_strategy_fiddly(max_size, pattern_count, lam='by_max', min_size=0):
 Nk_strategy = Nk_strategy_fiddly
 
 
-# def min_embedding(pattern_list, graph_list, td_list):
-#     '''For each (transaction) graph, we use only those patterns that
-#     have smaller or equal size. This implements the min-kernel as 
-#     descibed in the paper. 
-#     '''
-#     min_embeddings = HomSub(pattern_list, graph_list, td_list=td_list, min_embedding=True)
-#     return min_embeddings
-
-# def full_embedding(pattern_list, graph_list, td_list):
-#     '''For each (transaction) graph, we compute the hom counts for all 
-#     patterns. This implements a standard kernel which is likely useful 
-#     for feeding into an MLP.
-#     '''
-#     full_embeddings = HomSub(pattern_list, graph_list, td_list=td_list, min_embedding=False)
-#     return full_embeddings
-
-
 def get_small_patterns():
     singleton, td_singleton = partial_ktree_sample(N=1, k=0, p=1)
     edge, td_edge = partial_ktree_sample(N=2, k=1, p=1)
@@ -317,18 +300,17 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
             if stop_step >= early_stopping:
                 break
 
-
         print(f'NOTE hom representations have shape {hom_representations.shape} to be as powerful as wl with n_iter={-pattern_count} (shape={wl_representations.shape}).\n  wl has {np.unique(wl_representations, axis=0).shape[0]} unique reps, hom has {np.unique(hom_representations, axis=0).shape[0]} unique reps')
         if pattern_file is not None:
             pickle.dump(pattern_list, pattern_file)
         return hom_representations
+
 
 def product_graph_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, **kwargs):
 
     product_graphs = list()
     
     for g, h in tqdm(itertools.combinations(graphs, 2)):
-        # product_graphs.append(nx.from_numpy_array(np.kron(nx.to_numpy_array(g), nx.to_numpy_array(h))))
         product_graphs.append(nx.convert_node_labels_to_integers(nx.tensor_product(g,h)))
 
     if size == 'max':
@@ -340,8 +322,6 @@ def product_graph_ktree_profile(graphs, size='max', density=False, seed=8, patte
 
     gram = sp.squareform(kernels)
     return gram
-
-
 
 
 if __name__ == '__main__':
@@ -359,11 +339,3 @@ if __name__ == '__main__':
 
     arr = HomSub(patterns, graph_list, tds)
     print(arr)
-
-    # print(Nk_strategy_geom(30, 20, p='by_max'))
-    # print(Nk_strategy_poisson(30,20))
-    # print(Nk_strategy_fiddly(30,20))
-    
-    # print(random_ktree_profile(graph_list, pattern_count=10))
-
-
