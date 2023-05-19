@@ -1,7 +1,3 @@
-[submodule "graph-homomorphism-network"]
-	path = graph-homomorphism-network
-	url = git@anonymous.4open.science/r/HomCount_countingfork_ICML_2023
-	branch = develop
 [submodule "HomSub"]
 	path = HomSub
-	url = git@anonymous.4open.science/r/HomCount_HomSub_ICML_2023
+	url = https://github.com/pwelke/HomSub
