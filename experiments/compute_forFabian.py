@@ -18,7 +18,7 @@ datasets = ['ogbg-moltox21',
             'ogbg-mollipo',
             'ogbg-molhiv',]
 
-executables = ['graph-homomorphism-network/models/fabian_extraction.py', ] 
+executables = ['models/fabian_extraction.py', ] 
 
 run_ids = ['il3',]# 'il4',] #'run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9', 'run10']
 

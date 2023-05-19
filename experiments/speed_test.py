@@ -9,7 +9,7 @@ cwd = './'
 
 datasets = ['MUTAG'] #, 'CSL', 'PAULUS25', 'BZR', 'IMDBBINARY', 'IMDBMULTI', 'REDDIT-BINARY', 'NCI1', 'ENZYMES', 'DD', 'COLLAB']
 
-executables = ['graph-homomorphism-network/models/embedding.py']
+executables = ['models/embedding.py']
 
 run_ids = ['run1','run2','run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9', 'run10']
 

@@ -23,7 +23,7 @@ datasets = [
             'ogbg-molhiv',
             ]
 
-executables = ['graph-homomorphism-network/models/fabian_extraction.py', ] 
+executables = ['models/fabian_extraction.py', ] 
 
 run_ids = ['run1']
 

@@ -11,7 +11,7 @@ dloc = 'graph-homomorphism-network/data/'
 
 datasets = ['CSL']
 
-executables = ['graph-homomorphism-network/models/svm.py', 'graph-homomorphism-network/models/mlp.py'] 
+executables = ['models/svm.py', 'models/mlp.py'] 
 
 run_ids = ['run1', 'run2','run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9', 'run10']
 
