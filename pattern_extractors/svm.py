@@ -2,8 +2,6 @@ import argparse
 import numpy as np
 from tqdm import tqdm
 from time import time
-import sys
-sys.path.append('graph-homomorphism-network/src')
 
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, create_folds, augment_data, precompute_patterns_file_handle

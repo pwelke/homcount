@@ -17,7 +17,6 @@ from ghc.homomorphism import get_hom_profile
 from ghc.utils.data import load_data, load_precompute,\
                                save_precompute, load_folds
 from ghc.utils.ml import accuracy
-import sys
 from mlp import MLP
 
 

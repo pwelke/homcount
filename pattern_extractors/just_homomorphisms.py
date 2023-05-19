@@ -5,15 +5,11 @@ import pickle as pkl
 from time import time
 import numpy as np
 from tqdm import tqdm
-import sys
-sys.path.append('graph-homomorphism-network/src')
 
 from ghc.homomorphism import get_hom_profile
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, augment_data, precompute_patterns_file_handle,\
                            load_data_for_json, hom2json, save_json, load_precompute_patterns
-from ghc.utils.ml import accuracy
-import sys
 
 
 if __name__ == "__main__":

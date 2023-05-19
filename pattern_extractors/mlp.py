@@ -16,7 +16,6 @@ from ghc.generate_k_tree import filter_overflow
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, create_folds, augment_data
 from ghc.utils.ml import accuracy
-import sys
 
 class MLP(nn.Module):
 
