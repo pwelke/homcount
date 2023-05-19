@@ -44,6 +44,7 @@ if __name__ == '__main__':
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
     parser.add_argument('--dloc', type=str, default="./data")
+    parser.add_argument('--oloc', type=str, default="./data")
     parser.add_argument('--seed', type=int, default=0)
 
     parser.add_argument('--seed', type=int, default=0)
@@ -65,7 +66,7 @@ if __name__ == '__main__':
 
     #### Setup checkpoints
     os.makedirs("./checkpoints/", exist_ok=True)
-    os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
+    os.makedirs(args.oloc, exist_ok=True)
 
     #### Load data and compute homomorphism
     graphs, _, y = load_data(args.data.upper(), args.dloc)
@@ -79,12 +80,11 @@ if __name__ == '__main__':
         homX = load_precompute(args.data.upper(),
                         args.hom_type,
                         args.hom_size,
-                        os.path.join(args.dloc, "precompute"))
+                        args.oloc)
     except FileNotFoundError:
         homX = [hom_func(g, size=args.hom_size, density=False, node_tags=X)\
                 for g in tqdm(graphs, desc="Hom")]
-        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
-                        os.path.join(args.dloc, "precompute"))
+        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.oloc)
     tensorX = torch.Tensor(homX).float().to(device)
     tensorX = tensorX / (tensorX.max(0, keepdim=True)[0]+0.5)
     tensory = torch.Tensor(y).flatten().long().to(device)

@@ -61,6 +61,7 @@ if __name__ == "__main__":
     parser.add_argument('--drop_nodes_rate', type=int, default=1)
     parser.add_argument('--gen_per_graph', type=int, default=1)
     parser.add_argument('--dloc', type=str, default="./data")
+    parser.add_argument('--oloc', type=str, default="./data")
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--epochs', type=int, default=5000)
     parser.add_argument('--bs', type=int, default=32)
@@ -83,7 +84,7 @@ if __name__ == "__main__":
     device = torch.device(device_id)
     #### Setup checkpoints and precompute
     os.makedirs("./checkpoints/", exist_ok=True)
-    os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
+    os.makedirs(args.oloc, exist_ok=True)
     #### Load data and compute homomorphism
     # graphs, X, y = load_data(args.data.upper(), args.dloc)
     # splits = load_folds(args.data.upper(), args.dloc)
@@ -92,12 +93,12 @@ if __name__ == "__main__":
     #     homX = load_precompute(args.data.upper(),
     #                     args.hom_type,
     #                     args.hom_size,
-    #                     os.path.join(args.dloc, "precompute"))
+    #                     args.oloc)
     # except FileNotFoundError:
     #     homX = [hom_func(g, size=args.hom_size, density=False, node_tags=X[i])\
     #             for i, g in enumerate(tqdm(graphs, desc="Hom"))]
     #     save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size,
-    #                     os.path.join(args.dloc, "precompute"))
+    #                     args.oloc)
 
     #### Fast WL Implementation
     def wl_direct_scipysparse_nocomp(a: sparse.csr_matrix, n_iter=5):

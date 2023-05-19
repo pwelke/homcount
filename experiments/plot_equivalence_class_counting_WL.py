@@ -66,7 +66,7 @@ if __name__ == '__main__':
     pattern_counts = [1,2,3,4,5] 
     hom_types = ['wl_kernel']
     hom_size = 'max'
-    dloc = 'graph-homomorphism-network/data/precompute/'
+    dloc = 'data/homcount/'
 
     datasets = ['ogbg-moltox21',
                 'ogbg-molesol',

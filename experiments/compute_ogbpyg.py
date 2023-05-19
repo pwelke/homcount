@@ -28,7 +28,7 @@ pattern_counts = [50]
 hom_types = ['full_kernel']
 
 hom_size = 'max'
-dloc = 'graph-homomorphism-network/data/'
+dloc = 'data'
 
 
 # download and preprocess all datasets
@@ -46,7 +46,8 @@ for run_id, dataset, executable, pattern_count, hom_type in itertools.product(ru
     args = ['python', executable, 
             '--data', dataset,
             '--seed', hashfct(run_id),
-            '--dloc', dloc,
+            '--dloc', join(dloc, 'graphdbs'),
+            '--oloc', join(dloc, 'homcount'),
             '--pattern_count', str(pattern_count),
             '--run_id', run_id,
             '--hom_type', hom_type,
@@ -56,6 +57,6 @@ for run_id, dataset, executable, pattern_count, hom_type in itertools.product(ru
     subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
 
 # remove features with problems
-file_overflow_filter(run_ids, datasets, pattern_counts, hom_types, hom_size, dloc + 'precompute')
-file_singleton_filter(run_ids, datasets, pattern_counts, hom_types, hom_size, dloc + 'precompute')
+file_overflow_filter(run_ids, datasets, pattern_counts, hom_types, hom_size, join(dloc, 'homcount'))
+file_singleton_filter(run_ids, datasets, pattern_counts, hom_types, hom_size, join(dloc, 'homcount'))
 

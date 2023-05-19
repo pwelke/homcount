@@ -29,6 +29,8 @@ if __name__ == "__main__":
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
     parser.add_argument('--dloc', type=str, default="./data")
+    parser.add_argument('--oloc', type=str, default="./data")
+
 
     # arguments for compatibility reasons which are ignored
     parser.add_argument('--seed', type=int, default=0)
@@ -54,7 +56,7 @@ if __name__ == "__main__":
     
     #### Setup checkpoints and precompute
     os.makedirs("./checkpoints/", exist_ok=True)
-    os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
+    os.makedirs(args.oloc, exist_ok=True)
     
     #### Load data and compute homomorphism
     graphs, _, y, metas = load_data_for_json(args.data.upper(), args.dloc)
@@ -65,14 +67,13 @@ if __name__ == "__main__":
                                 args.hom_size,
                                 args.pattern_count,
                                 args.run_id,
-                                os.path.join(args.dloc, "precompute"))
-        print(f'({args.data.upper()},{args.hom_type},{args.hom_size},{args.pattern_count},{args.run_id},{os.path.join(args.dloc, "precompute")}) loads')
+                                args.oloc)
+        print(f'({args.data.upper()},{args.hom_type},{args.hom_size},{args.pattern_count},{args.run_id},{args.oloc}) loads')
         
 
     except FileNotFoundError:
         # changed it to batch computation to not recompute the patterns each time
-        with precompute_patterns_file_handle(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                        os.path.join(args.dloc, "precompute")) as f:
+        with precompute_patterns_file_handle(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc) as f:
             homX = hom_func(graphs, 
                             size=args.hom_size, 
                             density=False, 
@@ -80,17 +81,15 @@ if __name__ == "__main__":
                             pattern_count=args.pattern_count, 
                             pattern_file=f,
                             )
-        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                        os.path.join(args.dloc, "precompute"))
+        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)
 
         metas = hom2json(metas, homX, y)
         try:
-            pattern_sizes = [len(p.nodes) for p in load_precompute_patterns(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                            os.path.join(args.dloc, "precompute"))]
+            pattern_sizes = [len(p.nodes) for p in load_precompute_patterns(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)]
         except EOFError:
             ## TODO careful: this is hacky and supposed to work for for WL patterns, that don't have any size we want to compute
             pattern_sizes = [args.pattern_count for _ in range(homX.shape[1])]
+
         metas = {'pattern_sizes': pattern_sizes, 'data': metas}
-        save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                        os.path.join(args.dloc, "precompute"))
+        save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)
     

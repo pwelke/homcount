@@ -7,6 +7,7 @@ import hashlib
 
 # parameters to iterate over
 cwd = './'
+dloc = 'data'
 
 datasets = ['ogbg-moltox21',
             'ogbg-molesol',
@@ -34,7 +35,8 @@ for run_id, dataset, executable, pattern_count, hom_type in itertools.product(ru
     args = ['python', executable, 
             '--data', dataset,
             '--seed', hashfct(run_id),
-            '--dloc', 'graph-homomorphism-network/data',
+            '--dloc', join(dloc, 'graphdbs'),
+            '--oloc', join(dloc, 'homcount'),
             '--pattern_count', str(pattern_count),
             '--run_id', run_id,
             '--hom_type', hom_type,

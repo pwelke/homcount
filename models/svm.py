@@ -31,6 +31,7 @@ if __name__ == "__main__":
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
     parser.add_argument('--dloc', type=str, default="./data")
+    parser.add_argument('--oloc', type=str, default="./data")
     parser.add_argument('--seed', type=int, default=0)
 
     # arguments for compatibility reasons that are ignored
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     
     #### Setup checkpoints and precompute
     os.makedirs("./checkpoints/", exist_ok=True)
-    os.makedirs(os.path.join(args.dloc, "precompute"), exist_ok=True)
+    os.makedirs(args.oloc, exist_ok=True)
 
     #### Load data and compute homomorphism
     # the middle parameter loads graph feature info and is ignored, for now
@@ -100,12 +101,11 @@ if __name__ == "__main__":
                         args.hom_size,
                         args.pattern_count,
                         args.run_id,
-                        os.path.join(args.dloc, "precompute"))
+                        args.oloc)
 
     except FileNotFoundError:
         # changed it to batch computation to not recompute the patterns each time
-        with precompute_patterns_file_handle(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                        os.path.join(args.dloc, "precompute")) as f:
+        with precompute_patterns_file_handle(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc) as f:
             homX = hom_func(graphs, 
                             size=args.hom_size, 
                             density=False, 
@@ -113,8 +113,7 @@ if __name__ == "__main__":
                             pattern_count=args.pattern_count, 
                             pattern_file=f,
                             )
-        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                        os.path.join(args.dloc, "precompute"))
+        save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)
 
 
     X = filter_overflow(np.array(homX))
