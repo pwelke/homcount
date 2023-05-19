@@ -84,8 +84,12 @@ if __name__ == "__main__":
                         os.path.join(args.dloc, "precompute"))
 
         metas = hom2json(metas, homX, y)
-        pattern_sizes = [len(p.nodes) for p in load_precompute_patterns(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
-                        os.path.join(args.dloc, "precompute"))]
+        try:
+            pattern_sizes = [len(p.nodes) for p in load_precompute_patterns(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
+                            os.path.join(args.dloc, "precompute"))]
+        except EOFError:
+            ## TODO careful: this is hacky and supposed to work for for WL patterns, that don't have any size we want to compute
+            pattern_sizes = [args.pattern_count for _ in range(homX.shape[1])]
         metas = {'pattern_sizes': pattern_sizes, 'data': metas}
         save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
                         os.path.join(args.dloc, "precompute"))

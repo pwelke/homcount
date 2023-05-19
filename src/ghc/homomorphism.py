@@ -6,6 +6,7 @@ import numpy as np
 # from ghc.utils.DISCio import DISChom
 from ghc.generate_k_tree import random_ktree_profile, large_pattern, min_kernel, full_kernel
                 # large_pattern_no_overflow, min_kernel_no_overflow, full_kernel_no_overflow
+from ghc.utils.fast_weisfeiler_lehman import wl_kernel
 import pickle
 
 
@@ -178,6 +179,8 @@ def get_hom_profile(f_str):
         return min_kernel
     elif f_str == "full_kernel":
         return full_kernel
+    elif f_str == "wl_kernel":
+        return wl_kernel
     # elif f_str == "min_kernel_no_overflow":
     #     return min_kernel_no_overflow
     # elif f_str == "full_kernel_no_overflow":
@@ -200,4 +203,5 @@ def get_hom_profile(f_str):
         return ["labeled_tree", "labeled_tree_exp",
                 "tree", "random_tree", "path", "cycle", 
                 "tree+cycle", "atlas", "random_ktree", 
-                "product_graph_ktree_profile", "min_kernel", "full_kernel", 'large_pattern']
+                "product_graph_ktree_profile", "min_kernel", 
+                "full_kernel", 'wl_kernel', 'large_pattern']

@@ -84,3 +84,10 @@ def compare_equivalence_classes(hom_features, wl_features):
     # not yet really what we want, but simple
     return diff
 
+
+def wl_kernel(graphs, pattern_count=50, **kwargs):
+
+    wl_nodelabels = homsub_format_wl_nodelabels(graphs, vertex_features=None, n_iter=pattern_count)
+    wl_representations = np.array([np.sum(g, axis=0) for g in wl_nodelabels])
+
+    return wl_representations
