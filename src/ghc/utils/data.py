@@ -8,7 +8,7 @@ import random
 import json
 from itertools import repeat
 from sklearn.model_selection import KFold
-from homlib import Graph as hlGraph
+# from homlib import Graph as hlGraph
 
 
 ALL_DATA = ["MUTAG", "PTC_MR", "IMDBBINARY", "IMDBMULTI", "NCI1", "PROTEINS",
@@ -84,15 +84,15 @@ def load_precompute_patterns(dataset, hom_type, hom_size, pattern_count, run_id,
     return X
 
 
-def nx2homg(nxg):
-    """Convert nx graph to homlib graph format. Only
-    undirected graphs are supported.
-    Note: This function expects nxg to have consecutive integer index."""
-    n = nxg.number_of_nodes()
-    G = hlGraph(n)
-    for (u, v) in nxg.edges():
-        G.addEdge(u,v)
-    return G
+# def nx2homg(nxg):
+#     """Convert nx graph to homlib graph format. Only
+#     undirected graphs are supported.
+#     Note: This function expects nxg to have consecutive integer index."""
+#     n = nxg.number_of_nodes()
+#     G = hlGraph(n)
+#     for (u, v) in nxg.edges():
+#         G.addEdge(u,v)
+#     return G
 
 
 #def _swap_edges(g, num_swap):

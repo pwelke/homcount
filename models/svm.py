@@ -10,8 +10,8 @@ from ghc.utils.data import load_data, load_precompute, save_precompute,\
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, accuracy_score
-from ghc.homomorphism import get_hom_profile, random_tree_profile
-from ghc.generate_k_tree import random_ktree_profile, filter_overflow
+from ghc.homomorphism import get_hom_profile
+from ghc.generate_k_tree import filter_overflow
 
 from sklearn.preprocessing import StandardScaler
 import os
