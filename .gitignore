@@ -129,3 +129,5 @@ packed/
 # pickles
 *.pkl
 data/
+ogbdata/ogbg_molsider/
+homlib/tmp/
