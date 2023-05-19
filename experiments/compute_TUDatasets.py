@@ -11,7 +11,7 @@ cwd = './'
 dloc = 'data'
 
 
-datasets = ['MUTAG', 'CSL', 'PAULUS25', 'BZR', 'IMDBBINARY', 'IMDBMULTI', 'REDDIT-BINARY', 'NCI1', 'ENZYMES', 'DD', 'COLLAB']
+datasets = ['MUTAG', 'BZR', 'IMDB-BINARY', 'IMDB-MULTI', 'REDDIT-BINARY', 'NCI1', 'ENZYMES', 'DD', 'COLLAB']
 
 executables = ['pattern_extractors/svm.py', 'pattern_extractors/mlp.py'] 
 
@@ -19,7 +19,7 @@ run_ids = ['run1', 'run2','run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9'
 
 pattern_counts = [50,]
 
-hom_types = ['random_ktree'] # is actually min_kernel, but right now on existing data
+hom_types = ['min_kernel', 'full_kernel'] 
 
 # a deterministic hash function returning a 32 bit integer value for a given utf-8 string
 hashfct = lambda x: str(int(hashlib.sha1(bytes(x, 'utf-8')).hexdigest(), 16) & 0xFFFFFFFF)
