@@ -3,7 +3,7 @@ import itertools
 import sys
 import os
 import hashlib 
-from convert_to_overflowfiltered import file_overflow_filter, file_singleton_filter
+from ghc.utils.converter import file_overflow_filter, file_singleton_filter
 
 # parameters to iterate over
 cwd = './'

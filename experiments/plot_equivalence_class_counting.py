@@ -1,5 +1,4 @@
 import sys
-sys.path.append('graph-homomorphism-network/src')
 from ghc.utils.data import load_json, save_json
 import json
 import itertools

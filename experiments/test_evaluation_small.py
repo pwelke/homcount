@@ -8,18 +8,20 @@ from ghc.utils.converter import file_overflow_filter, file_singleton_filter
 
 # parameters to iterate over
 cwd = './'
-dloc = 'graph-homomorphism-network/data/'
+dloc = '../homcount/graph-homomorphism-network/data/'
 
 
-datasets = ['MUTAG', 'CSL', 'PAULUS25', 'BZR', 'IMDBBINARY', 'IMDBMULTI', 'REDDIT-BINARY', 'NCI1', 'ENZYMES', 'DD', 'COLLAB']
+datasets = ['MUTAG']
 
-executables = ['graph-homomorphism-network/models/svm.py', 'graph-homomorphism-network/models/mlp.py'] 
+executables = ['models/svm.py'] 
 
-run_ids = ['run1', 'run2','run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9', 'run10']
+run_ids = ['run1']
 
 pattern_counts = [50,]
 
-hom_types = ['random_ktree'] # is actually min_kernel, but right now on existing data
+hom_size = 'max'
+
+hom_types = ['full_kernel'] # is actually min_kernel, but right now on existing data
 
 # a deterministic hash function returning a 32 bit integer value for a given utf-8 string
 hashfct = lambda x: str(int(hashlib.sha1(bytes(x, 'utf-8')).hexdigest(), 16) & 0xFFFFFFFF)

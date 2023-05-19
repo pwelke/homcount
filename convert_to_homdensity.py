@@ -1,31 +1,6 @@
-import sys
-sys.path.append('graph-homomorphism-network/src')
-from ghc.utils.data import load_json, save_json
-import json
-import itertools
+from ghc.utils.converter import file_homdensity_filter
 
 
-def file_homdensity_filter(run_ids, datasets, pattern_counts, hom_types, hom_size, dloc):
-
-    for run_id, dataset, pattern_count, hom_type in itertools.product(run_ids, datasets, pattern_counts, hom_types):
-
-        try:
-
-            meta = load_json(dataset.upper(), hom_type, hom_size, pattern_count, run_id, dloc)
-
-            pattern_sizes = meta['pattern_sizes']
-            data = meta['data']
-
-            def density(n, counts, sizes):
-                return [c / (n ** s) for c,s in zip(counts, sizes)]
-
-            for x in data:
-                hom_density = density(x['vertices'], x['counts'], pattern_sizes)
-                x['counts'] = hom_density
-
-            save_json(meta, dataset.upper(), hom_type, hom_size, pattern_count, run_id, dloc, suffix='densities')
-        except FileNotFoundError:
-            pass # we don't process whats not there
 if __name__ == "__main__":
     datasets = ['ogbg-moltox21',
             'ogbg-molesol',
