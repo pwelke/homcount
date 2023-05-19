@@ -11,8 +11,8 @@ import torchvision.transforms as transforms
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from tqdm import tqdm
-from ghc.homomorphism import get_hom_profile, random_tree_profile
-from ghc.generate_k_tree import random_ktree_profile, filter_overflow
+from ghc.homomorphism import get_hom_profile
+from ghc.generate_k_tree import filter_overflow
 from ghc.utils.data import load_data, load_precompute, save_precompute,\
                            load_folds, create_folds, augment_data
 from ghc.utils.ml import accuracy

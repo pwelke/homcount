@@ -124,6 +124,7 @@ def Nk_strategy_poisson(max_size, pattern_count, lam='by_max'):
 
 
 def Nk_strategy_fiddly(max_size, pattern_count, lam='by_max', min_size=0):
+    '''This is the proposed samping strategy for in expectation polynomial run time that is proposed in the paper'''
 
     # we want to be polynomial time in expectation
     if lam == 'by_max':
@@ -180,25 +181,13 @@ def min_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, earl
     patterns = random_ktree_profile(graphs, size=size, density=density, seed=seed, pattern_count=pattern_count, early_stopping=early_stopping, metadata=metadata, pattern_file=pattern_file,
                                 # this is what we really fix for the min_kernel
                                 min_embedding=True, add_small_patterns=True, **kwargs)
-    # patterns = filter_overflow(patterns)
     return patterns
 
 
 def full_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, pattern_file=None, **kwargs):
     patterns = random_ktree_profile(graphs, size=size, density=density, seed=seed, pattern_count=pattern_count, early_stopping=early_stopping, metadata=metadata, pattern_file=pattern_file,
-                                # this is what we really fix for the min_kernel
+                                # this is what we really fix for the full_kernel
                                 min_embedding=False, add_small_patterns=True, **kwargs)
-    # patterns = filter_overflow(patterns)
-    return patterns
-
-
-def large_pattern(graphs, **kwargs):
-
-    # return the requested number of patterns
-    kt_list, td_list = partial_ktree_sample(100, 1, 0.0)
-
-    patterns = HomSub(pattern_list=[kt_list], graph_list=graphs, td_list=[td_list], min_embedding=False)
-    # patterns = filter_overflow(patterns)
     return patterns
 
 
@@ -304,38 +293,3 @@ def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_coun
         if pattern_file is not None:
             pickle.dump(pattern_list, pattern_file)
         return hom_representations
-
-
-def product_graph_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, **kwargs):
-
-    product_graphs = list()
-    
-    for g, h in tqdm(itertools.combinations(graphs, 2)):
-        product_graphs.append(nx.convert_node_labels_to_integers(nx.tensor_product(g,h)))
-
-    if size == 'max':
-        size = max([len(g.nodes) for g in graphs])
-
-    embeddings = random_ktree_profile(product_graphs, size, density, seed, pattern_count)
-
-    kernels = np.sum(embeddings, axis=1)
-
-    gram = sp.squareform(kernels)
-    return gram
-
-
-if __name__ == '__main__':
-
-
-    pattern_list = [nx.path_graph(i) for i in range(2,5)]
-    graph_list = [nx.path_graph(i) for i in range(2,10)]
-
-    print(product_graph_ktree_profile(pattern_list, pattern_count=2))
-
-    patterns, tds = get_pattern_list(10, 2)
-
-    print(f'{PACE_graph_format(patterns[0])}')
-    print(tds[0])
-
-    arr = HomSub(patterns, graph_list, tds)
-    print(arr)
