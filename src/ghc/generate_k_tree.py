@@ -4,6 +4,7 @@ import itertools
 
 from ghc.utils.HomSubio import HomSub, PACE_graph_format
 from ghc.utils.fast_weisfeiler_lehman import *
+from ghc.utils.converter import filter_overflow
 import numpy as np
 import scipy.spatial.distance as sp
 from tqdm import tqdm
@@ -157,7 +158,6 @@ def get_small_patterns():
 
 def get_pattern_list(size, pattern_count, min_size=0):
     
-    # tw_downweighting_p = 0.35
     partial_ktree_edge_keeping_p = 0.9
     
     # TODO: handling possibly disconnected patterns, now. 
@@ -166,7 +166,7 @@ def get_pattern_list(size, pattern_count, min_size=0):
     td_list = list()
     while len(kt_list) < pattern_count:
         
-        sizes, treewidths = Nk_strategy(size, 1, 'by_max')
+        sizes, treewidths = Nk_strategy(size, 1, 'by_max', min_size=min_size)
         pattern, td = partial_ktree_sample(N=sizes[0], k=treewidths[0], p=partial_ktree_edge_keeping_p)
 
         kt_list += [pattern]
@@ -191,17 +191,73 @@ def full_kernel(graphs, size='max', density=False, seed=8, pattern_count=50, ear
     return patterns
 
 
-def filter_overflow(patterns):
-    minval = np.min(patterns, axis=0)
-    patterns = patterns[:, minval >= 0]
-    if patterns.shape[1] > 0:
-        return patterns
-    else: 
-        # if nothing worked, return zeros
-        return np.zeros([patterns.shape[0], 1])
+# def filter_overflow(patterns):
+#     minval = np.min(patterns, axis=0)
+#     patterns = patterns[:, minval >= 0]
+#     if patterns.shape[1] > 0:
+#         return patterns
+#     else: 
+#         # if nothing worked, return zeros
+#         return np.zeros([patterns.shape[0], 1])
 
 
-def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, min_embedding=True, add_small_patterns=False, pattern_file=None, **kwargs):
+def random_ktree_profile(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, min_embedding=True, add_small_patterns=False, pattern_file=None, filter_and_retry=True, **kwargs):
+    '''
+
+    Parameters:
+        - add_small_patterns: If true, the first four patterns will be the singleton, the edge, the wedge, and the triangle. Further samples will have size at least four.
+    '''
+
+    if size == 'max':
+        size = max([len(g.nodes) for g in graphs])
+    
+    if size == 'half_max':
+        size = max([len(g.nodes) for g in graphs]) / 2
+
+    
+
+    if add_small_patterns:
+        # the 4 patterns of size 1-3 are added deterministically and do not need to be sampled
+        # hence we reduce the pattern count and increase the min pattern size
+        min_pattern_size = 4
+        kt_list, td_list = get_pattern_list(size, pattern_count=pattern_count - 4, min_size=min_pattern_size)
+        kt_small, td_small = get_small_patterns()
+        kt_list = kt_small + kt_list
+        td_list = td_small + td_list
+    else:
+        # just sample the requested number of patterns
+        min_pattern_size = 0
+        kt_list, td_list = get_pattern_list(size, pattern_count=pattern_count - 4, min_size=min_pattern_size)
+
+    # compute homomorphism counts
+    embeddings = HomSub(pattern_list=kt_list, graph_list=graphs, td_list=td_list, min_embedding=min_embedding)
+
+    # here, we remove patterns for which the homcount overflowed and resample new patterns if necessary
+    # TODO: note that this process might take very long to terminate if we frequently draw patterns which overflow the homcounts
+    if filter_and_retry:
+        embeddings, kt_list = filter_overflow(embeddings, kt_list)
+        while embeddings.shape[1] < pattern_count:
+            kt_tmp, td_tmp = get_pattern_list(size, pattern_count=pattern_count - embeddings.shape[1], min_size=min_pattern_size)
+            embeddings_tmp = HomSub(pattern_list=kt_tmp, graph_list=graphs, td_list=td_tmp, min_embedding=min_embedding)
+            embeddings_tmp, kt_tmp = filter_overflow(embeddings, kt_tmp)
+
+            # append new filtered patterns
+            kt_list = kt_list + kt_tmp
+            embeddings = np.hstack([embeddings, embeddings])
+
+    # store patterns and return output
+    if pattern_file is not None:
+        pickle.dump(kt_list, pattern_file)
+    return embeddings
+
+
+
+def random_ktree_profile_relative_to_wl(graphs, size='max', density=False, seed=8, pattern_count=50, early_stopping=10, metadata=None, min_embedding=True, add_small_patterns=False, pattern_file=None, **kwargs):
+    '''
+
+    Parameters:
+        - add_small_patterns: If true, the first four patterns will be the singleton, the edge, the wedge, and the triangle. Further samples will have size at least four.
+    '''
 
     if size == 'max':
         size = max([len(g.nodes) for g in graphs])

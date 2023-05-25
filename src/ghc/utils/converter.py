@@ -8,7 +8,10 @@ import numpy as np
 def filter_overflow(patterns, sizes):
     minval = np.min(patterns, axis=0)
     patterns = patterns[:, minval >= 0]
-    sizes = sizes[minval >= 0]
+    if isinstance(sizes, list):
+        sizes = [s for s,m in zip(sizes, minval) if m >= 0]
+    else:
+        sizes = sizes[minval >= 0]
 
     if patterns.shape[1] > 0:
         return patterns, sizes

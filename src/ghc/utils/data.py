@@ -53,7 +53,7 @@ def save_json(meta, dataset, hom_type, hom_size, pattern_count, run_id, dloc, su
     dataf = os.path.abspath(dloc)
     tmp_str = f"{dataf}/{dataset}_{hom_type}_{hom_size}_{pattern_count}_{run_id}.{suffix}"
     with open(tmp_str, 'w') as f:
-        json.dump(meta, f)
+        json.dump(meta, f, default=int)
 
 def load_json(dataset, hom_type, hom_size, pattern_count, run_id, dloc, suffix='homson'):
     dataf = os.path.abspath(dloc)

@@ -3,13 +3,15 @@ import numpy as np
 from tqdm import tqdm
 from time import time
 
-from ghc.utils.data import load_data, load_precompute, save_precompute,\
-                           load_folds, create_folds, augment_data, precompute_patterns_file_handle
+from ghc.utils.data import load_data_for_json, load_precompute, save_precompute,\
+                           load_folds, create_folds, augment_data, precompute_patterns_file_handle,\
+                           load_data_for_json, hom2json, save_json, load_precompute_patterns
+
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, accuracy_score
 from ghc.homomorphism import get_hom_profile
-from ghc.generate_k_tree import filter_overflow
+from ghc.utils.converter import filter_overflow
 
 from sklearn.preprocessing import StandardScaler
 import os
@@ -85,7 +87,7 @@ if __name__ == "__main__":
 
     #### Load data and compute homomorphism
     # the middle parameter loads graph feature info and is ignored, for now
-    graphs, _, y = load_data(args.data.upper(), args.dloc)
+    graphs, _, y, metas = load_data_for_json(args.data.upper(), args.dloc)
     y = y.flatten()
     try:
         splits = load_folds(args.data.upper(), args.dloc)
@@ -113,9 +115,19 @@ if __name__ == "__main__":
                             )
         save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)
 
+        metas = hom2json(metas, homX, y)
+        try:
+            pattern_sizes = [len(p.nodes) for p in load_precompute_patterns(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)]
+        except EOFError:
+            ## TODO careful: this is hacky and supposed to work for for WL patterns, that don't have any size we want to compute
+            pattern_sizes = [args.pattern_count for _ in range(homX.shape[1])]
 
-    X = filter_overflow(np.array(homX))
+        metas = {'pattern_sizes': pattern_sizes, 'data': metas}
+        save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)
 
+
+    # X = filter_overflow(np.array(homX))
+    X = np.array(homX)
     
     # Train SVC 
     svm_time = time()

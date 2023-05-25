@@ -12,9 +12,9 @@ from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from tqdm import tqdm
 from ghc.homomorphism import get_hom_profile
-from ghc.generate_k_tree import filter_overflow
-from ghc.utils.data import load_data, load_precompute, save_precompute,\
-                           load_folds, create_folds, augment_data
+from ghc.utils.data import load_data_for_json, load_precompute, save_precompute,\
+                           load_folds, create_folds, augment_data, precompute_patterns_file_handle,\
+                           load_data_for_json, hom2json, save_json, load_precompute_patterns
 from ghc.utils.ml import accuracy
 
 class MLP(nn.Module):
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     
     #### Load data and compute homomorphism
     # the middle parameter loads graph feature info and is ignored, for now
-    graphs, _, y = load_data(args.data.upper(), args.dloc)
+    graphs, _, y, metas = load_data_for_json(args.data.upper(), args.dloc)
     try:
         splits = load_folds(args.data.upper(), args.dloc)
     except FileNotFoundError:
@@ -127,9 +127,17 @@ if __name__ == "__main__":
                             )
         save_precompute(homX, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id,
                         args.oloc)
-    
-    homX = filter_overflow(homX)
 
+        metas = hom2json(metas, homX, y)
+        try:
+            pattern_sizes = [len(p.nodes) for p in load_precompute_patterns(args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)]
+        except EOFError:
+            ## TODO careful: this is hacky and supposed to work for for WL patterns, that don't have any size we want to compute
+            pattern_sizes = [args.pattern_count for _ in range(homX.shape[1])]
+
+        metas = {'pattern_sizes': pattern_sizes, 'data': metas}
+        save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)
+    
     tensor_gen_X = None
     tensor_gen_y = None
     tensorX = torch.Tensor(homX).float().to(device)
