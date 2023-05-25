@@ -67,7 +67,7 @@ if __name__ == '__main__':
     pattern_counts = [50] 
     hom_types = ['full_kernel']
     hom_size = 'max'
-    dloc = '2023-03-07_ogbpyg_repetition/repeated_runs/'
+    dloc = 'data/homcount'
 
     datasets = ['ogbg-moltox21',
                 'ogbg-molesol',
