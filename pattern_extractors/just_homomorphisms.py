@@ -1,14 +1,9 @@
 import os
-import uuid
 import argparse
-import pickle as pkl
-from time import time
-import numpy as np
-from tqdm import tqdm
 
 from ghc.homomorphism import get_hom_profile
-from ghc.utils.data import load_data, load_precompute, save_precompute,\
-                           load_folds, augment_data, precompute_patterns_file_handle,\
+from ghc.utils.data import load_precompute, save_precompute,\
+                           precompute_patterns_file_handle,\
                            load_data_for_json, hom2json, save_json, load_precompute_patterns
 
 
@@ -42,8 +37,6 @@ if __name__ == "__main__":
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument("--log_period", type=int, default=200)
 
-
-
     args = parser.parse_args()
 
     if args.hom_size == -1:
@@ -51,7 +44,6 @@ if __name__ == "__main__":
         
     
     #### Setup checkpoints and precompute
-    os.makedirs("./checkpoints/", exist_ok=True)
     os.makedirs(args.oloc, exist_ok=True)
     
     #### Load data and compute homomorphism

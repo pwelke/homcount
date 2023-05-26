@@ -4,19 +4,16 @@ from tqdm import tqdm
 from time import time
 
 from ghc.utils.data import load_data_for_json, load_precompute, save_precompute,\
-                           load_folds, create_folds, augment_data, precompute_patterns_file_handle,\
-                           load_data_for_json, hom2json, save_json, load_precompute_patterns
+                           load_folds, create_folds, precompute_patterns_file_handle,\
+                           hom2json, save_json, load_precompute_patterns
 
-from sklearn.model_selection import StratifiedKFold, GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, accuracy_score
 from ghc.homomorphism import get_hom_profile
-from ghc.utils.converter import filter_overflow
 
 from sklearn.preprocessing import StandardScaler
 import os
-
-
 
 
 if __name__ == "__main__":
@@ -76,13 +73,8 @@ if __name__ == "__main__":
 
     if args.hom_size == -1:
         args.hom_size = 'max' # use maximum graph size in database
-        
-    
-    #### Setup devices and random seeds
-    device_id = "cpu"
     
     #### Setup checkpoints and precompute
-    os.makedirs("./checkpoints/", exist_ok=True)
     os.makedirs(args.oloc, exist_ok=True)
 
     #### Load data and compute homomorphism
@@ -125,43 +117,38 @@ if __name__ == "__main__":
         metas = {'pattern_sizes': pattern_sizes, 'data': metas}
         save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)
 
-
-    # X = filter_overflow(np.array(homX))
     X = np.array(homX)
     
     # Train SVC 
     svm_time = time()
-    a_acc = []  # All accuracies of num_run
-    # for j in tqdm(range(args.num_run)):
-    if True:
-        acc = []
-        # skf = StratifiedKFold(n_splits=int(1/args.test_ratio), shuffle=True)
-        for train_idx, test_idx in tqdm(splits): # skf.split(X, y): 
-            X_train = X[train_idx]
-            X_test = X[test_idx] 
-            y_train = y[train_idx] 
-            y_test = y[test_idx]
-            # Fit a scaler to training data
-            scaler = StandardScaler()
-            scaler = scaler.fit(X_train)
-            X_train = scaler.transform(X_train)
-            X_test = scaler.transform(X_test)
-            if args.grid_search:
-                grid_search = GridSearchCV(SVC(kernel=args.kernel), param_grid, cv=args.gs_nfolds,
-                                           n_jobs=8)
-                grid_search.fit(X_train,y_train)
-                if args.verbose:
-                    print(grid_search.best_params_)
-                clf = SVC(**grid_search.best_params_)
-            else:
-                clf = SVC(C=args.C, kernel=args.kernel, degree=args.degree, 
-                          gamma=args.gamma, decision_function_shape='ovr',
-                          random_state=None, class_weight='balanced')
-            clf.fit(X_train, y_train)
-            # print("train", f1_score(y_pred=clf.predict(X_train), y_true=y_train))
-            acc.append(accuracy_score(y_pred=clf.predict(X_test), y_true=y_test))
-            # print("val", f1_score(y_pred=clf.predict(X_test),
-                                # y_true=y_test, average=args.f1avg))
-        a_acc.extend(acc)
+
+    acc = []
+    for train_idx, test_idx in tqdm(splits): # skf.split(X, y): 
+        X_train = X[train_idx]
+        X_test = X[test_idx] 
+        y_train = y[train_idx] 
+        y_test = y[test_idx]
+        
+        # Fit a scaler to training data
+        scaler = StandardScaler()
+        scaler = scaler.fit(X_train)
+        X_train = scaler.transform(X_train)
+        X_test = scaler.transform(X_test)
+        
+        if args.grid_search:
+            grid_search = GridSearchCV(SVC(kernel=args.kernel), param_grid, cv=args.gs_nfolds,
+                                        n_jobs=8)
+            grid_search.fit(X_train,y_train)
+            if args.verbose:
+                print(grid_search.best_params_)
+            clf = SVC(**grid_search.best_params_)
+        else:
+            clf = SVC(C=args.C, kernel=args.kernel, degree=args.degree, 
+                        gamma=args.gamma, decision_function_shape='ovr',
+                        random_state=None, class_weight='balanced')
+        clf.fit(X_train, y_train)
+        acc.append(accuracy_score(y_pred=clf.predict(X_test), y_true=y_test))
+        # print("val", f1_score(y_pred=clf.predict(X_test), y_true=y_test, average=args.f1avg))
+
     svm_time = time() - svm_time
-    print(f"RUN {args.run_id} dims {X.shape[0]} {X.shape[1]} SVM {args.data.upper()} mean {np.mean(a_acc):.4f} std {np.std(a_acc):.4f}")
+    print(f"RUN {args.run_id} dims {X.shape[0]} {X.shape[1]} SVM {args.data.upper()} mean {np.mean(acc):.4f} std {np.std(acc):.4f}")

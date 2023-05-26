@@ -7,14 +7,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-import torchvision.transforms as transforms
-from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from tqdm import tqdm
 from ghc.homomorphism import get_hom_profile
 from ghc.utils.data import load_data_for_json, load_precompute, save_precompute,\
-                           load_folds, create_folds, augment_data, precompute_patterns_file_handle,\
-                           load_data_for_json, hom2json, save_json, load_precompute_patterns
+                           load_folds, create_folds, precompute_patterns_file_handle,\
+                           hom2json, save_json, load_precompute_patterns
 from ghc.utils.ml import accuracy
 
 class MLP(nn.Module):
