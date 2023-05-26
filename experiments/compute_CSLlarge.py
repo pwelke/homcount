@@ -37,6 +37,3 @@ for run_id, dataset, executable, pattern_count, hom_type in itertools.product(ru
             '--grid_search',
             ]
     subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
-
-file_overflow_filter(run_ids, datasets, pattern_counts, hom_types, hom_size, join(dloc, 'homcount'))
-file_singleton_filter(run_ids, datasets, pattern_counts, hom_types, hom_size, join(dloc, 'homcount'))
