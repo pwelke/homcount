@@ -1,29 +1,9 @@
-*.pt
-*.pyc
-2022-10-19.csv
-2022-10-19.log
-2022-10-20.csv
-2022-10-20.log
-2022-10-21.csv
-2022-10-21.log
-2022-10-31.csv
-2022-10-31.log
-2022-11-02.log
-2022-11-03.log
-2022-12-16_all_wl3exp.log
-2022-12-16_svm-glued_all.log
-2022-12-16_svm-glued.log
-2022-12-20_as-wl3.log
-ogbdata/
 
-
-# Training results
+# data files
 checkpoints/
-precompute/
-
-# Ignore log files
-logs/
-*.csv
+data/
+pygdata/
+ogbdata/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -147,6 +127,3 @@ packed/
 
 # pickles
 *.pkl
-data/
-ogbdata/ogbg_molsider/
-homlib/tmp/
