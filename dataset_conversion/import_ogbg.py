@@ -8,7 +8,7 @@ import numpy as np
 import json
 
 
-def convert_from_ogb(dataset_name, save_path:str='graph-homomorphism-network/data/'):
+def convert_from_ogb(dataset_name, save_path:str='data/graphdbs/'):
     
     dataset = GraphPropPredDataset(name = dataset_name, root = 'ogbdata/')
 
@@ -42,7 +42,16 @@ def convert_from_ogb(dataset_name, save_path:str='graph-homomorphism-network/dat
 
     # TODO: we don't store any labels, yet.
     with open(join(save_path, dataset_name.upper()) + '.y', 'wb') as f:
-        pickle.dump(np.zeros(len(graphs)), f)
+        if dataset.labels.shape[1] > 1:
+            categorical_labels = np.argmax(dataset.labels, axis=1)
+            print(f'We assume {dataset_name} has the categorical labels {np.unique(categorical_labels)}')
+            pickle.dump(categorical_labels, f)
+        else:
+            print(f'{dataset_name} seems to have numerical labels with {len(np.unique(dataset.labels))} distinct values')
+            pickle.dump(dataset.labels, f)
+
+
+
 
 datasets = ['ogbg-moltox21',
             'ogbg-molesol',
@@ -54,6 +63,7 @@ datasets = ['ogbg-moltox21',
             'ogbg-mollipo',
             'ogbg-molhiv',]
 
-for dataset_name in datasets:
-    convert_from_ogb(dataset_name)
+if __name__ == '__main__':
+    for dataset_name in datasets:
+        convert_from_ogb(dataset_name)
 

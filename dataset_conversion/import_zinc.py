@@ -2,17 +2,20 @@
 import networkx as nx
 import pickle
 from os.path import join
+from os import makedirs
 import numpy as np
 import json
 import torch_geometric as pyg
 
 
-def convert_from_pyg(save_path:str='graph-homomorphism-network/data/'):
+def convert_from_pyg(save_path:str='data/graphdbs/'):
 
     graphs = list()
     labels = list()
     metas = list()
     global_idx = 0
+
+    makedirs(save_path, exist_ok=True)
 
     for split in ['train', 'val', 'test']:
 
@@ -44,5 +47,6 @@ def convert_from_pyg(save_path:str='graph-homomorphism-network/data/'):
     with open(join(save_path, dataset_name.upper()) + '.y', 'wb') as f:
         pickle.dump(np.zeros(len(graphs)), f)
 
-convert_from_pyg()
+if __name__ == '__main__':
+    convert_from_pyg()
 
