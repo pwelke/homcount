@@ -1,7 +1,8 @@
 import subprocess
 import itertools
 import sys
-import os
+from os import makedirs
+from os.path import join
 import hashlib
 
 # parameters to iterate over
@@ -30,8 +31,6 @@ pattern_counts = [1,2,3,4,5]
 
 hom_types = ['wl_kernel'] # choices: min_kernel, full_kernel, wl_kernel
 
-hom_size = 'max'
-
 
 # a deterministic hash function returning a 32 bit integer value for a given utf-8 string
 hashfct = lambda x: str(int(hashlib.sha1(bytes(x, 'utf-8')).hexdigest(), 16) & 0xFFFFFFFF)
@@ -47,6 +46,5 @@ for run_id, dataset, executable, pattern_count, hom_type in itertools.product(ru
             '--pattern_count', str(pattern_count),
             '--run_id', run_id,
             '--hom_type', hom_type,
-            '--hom_size', '-1', # -1: select largest pattern size to be equal to largest graph in training set
             ]
     subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
