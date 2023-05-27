@@ -7,7 +7,8 @@ from ghc.utils.data import load_precompute, save_precompute,\
                            load_data_for_json, hom2json, save_json, load_precompute_patterns
 
 
-if __name__ == "__main__":
+
+def compute_hom(passed_args=None):
 
     hom_types = get_hom_profile(None)
 
@@ -16,12 +17,10 @@ if __name__ == "__main__":
     parser.add_argument('--pattern_count', type=int, default=50)
     parser.add_argument('--run_id', type=str, default=0)
     parser.add_argument('--hom_size', type=int, default=6)
-
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
     parser.add_argument('--dloc', type=str, default="./data")
     parser.add_argument('--oloc', type=str, default="./data")
-
 
     # arguments for compatibility reasons which are ignored
     parser.add_argument('--seed', type=int, default=0)
@@ -36,12 +35,25 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', action="store_true", default=False)
     parser.add_argument('--gpu_id', type=int, default=0)
     parser.add_argument("--log_period", type=int, default=200)
+    parser.add_argument("--grid_search", action="store_true", default=False)
 
-    args = parser.parse_args()
 
+    # Load partial args instead of command line args (if they are given)
+    if passed_args is not None:
+        # Transform dict to list of args
+        list_args = []
+        for key,value in passed_args.items():
+            # The case with "" happens if we want to pass an argument that has no parameter
+            list_args += [key, str(value)]
+
+        args = parser.parse_args(list_args)
+    else:
+        args = parser.parse_args()
+
+    
+    
     if args.hom_size == -1:
         args.hom_size = 'max' # use maximum graph size in database
-        
     
     #### Setup checkpoints and precompute
     os.makedirs(args.oloc, exist_ok=True)
@@ -81,3 +93,5 @@ if __name__ == "__main__":
         metas = {'pattern_sizes': pattern_sizes, 'data': metas}
         save_json(metas, args.data.upper(), args.hom_type, args.hom_size, args.pattern_count, args.run_id, args.oloc)
     
+if __name__ == "__main__":
+    compute_hom(passed_args=None)

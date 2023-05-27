@@ -3,7 +3,6 @@ import itertools
 import sys
 import os
 import hashlib
-from ghc.utils.converter import file_overflow_filter, file_singleton_filter
 
 # parameters to iterate over
 cwd = './'
@@ -17,7 +16,7 @@ run_ids = ['run1', 'run2','run3', 'run4', 'run5', 'run6', 'run7', 'run8', 'run9'
 
 pattern_counts = [20, 50, 100, 150, 200]
 
-hom_types = ['min_kernel'] # is actually min_kernel, but right now on existing data
+hom_types = ['min_kernel'] # choices: min_kernel, full_kernel, wl_kernel
 
 # a deterministic hash function returning a 32 bit integer value for a given utf-8 string
 hashfct = lambda x: str(int(hashlib.sha1(bytes(x, 'utf-8')).hexdigest(), 16) & 0xFFFFFFFF)
@@ -33,7 +32,7 @@ for run_id, dataset, executable, pattern_count, hom_type in itertools.product(ru
             '--pattern_count', str(pattern_count),
             '--run_id', run_id,
             '--hom_type', hom_type,
-            '--hom_size', '-1',
+            '--hom_size', '-1', # -1: select largest pattern size to be equal to largest graph in training set
             '--grid_search',
             ]
     subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)

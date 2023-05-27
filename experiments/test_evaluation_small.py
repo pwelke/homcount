@@ -3,25 +3,22 @@ import itertools
 import sys
 from os.path import join
 import hashlib
-from ghc.utils.converter import file_overflow_filter, file_singleton_filter
-
 
 # parameters to iterate over
 cwd = './'
 dloc = 'data/'
 
+datasets = ['CSL']
 
-datasets = ['MUTAG']
+executables = [ 'pattern_extractors/hom.py', 
+                'pattern_extractors/svm.py',
+                'pattern_extractors/mlp.py'] 
 
-executables = ['models/svm.py'] 
+run_ids = ['full']
 
-run_ids = ['run1']
+pattern_counts = [5,]
 
-pattern_counts = [7,]
-
-hom_size = 'max'
-
-hom_types = ['full_kernel'] # is actually min_kernel, but right now on existing data
+hom_types = ['min_kernel', 'full_kernel'] # choices: min_kernel, full_kernel
 
 # a deterministic hash function returning a 32 bit integer value for a given utf-8 string
 hashfct = lambda x: str(int(hashlib.sha1(bytes(x, 'utf-8')).hexdigest(), 16) & 0xFFFFFFFF)
@@ -37,10 +34,7 @@ for run_id, dataset, executable, pattern_count, hom_type in itertools.product(ru
             '--pattern_count', str(pattern_count),
             '--run_id', run_id,
             '--hom_type', hom_type,
-            '--hom_size', '-1',
-            # '--grid_search',
+            '--hom_size', '-1', # -1: select largest pattern size to be equal to largest graph in training set
+            '--grid_search',
             ]
     subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
-
-file_overflow_filter(run_ids, datasets, pattern_counts, hom_types, hom_size, join(dloc, 'homcount'))
-file_singleton_filter(run_ids, datasets, pattern_counts, hom_types, hom_size, join(dloc, 'homcount'))

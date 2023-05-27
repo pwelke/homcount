@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler
 import os
 
 
-if __name__ == "__main__":
+def compute_svm(passed_args=None):
     hom_types = get_hom_profile(None)
 
     #### Parse arguments
@@ -63,13 +63,23 @@ if __name__ == "__main__":
     parser.add_argument("--scaler", type=str, default="standard",
                         help="Name of data scaler to use as the preprocessing step")
 
+    # Load partial args instead of command line args (if they are given)
+    if passed_args is not None:
+        # Transform dict to list of args
+        list_args = []
+        for key,value in passed_args.items():
+            # The case with "" happens if we want to pass an argument that has no parameter
+            list_args += [key, str(value)]
+
+        args = parser.parse_args(list_args)
+    else:
+        args = parser.parse_args()
+
+    # Gridsearch ranges (will be used if grid-search arg is set)
     Cs = np.logspace(start=-5, stop=6, num=20).tolist()
     gammas = np.logspace(start=-5, stop=1, num=7).tolist() + ['scale']
     class_weight = ['balanced']
     param_grid = {'C': Cs, 'gamma': gammas, 'class_weight': class_weight}
-
-    args = parser.parse_args()
-
 
     if args.hom_size == -1:
         args.hom_size = 'max' # use maximum graph size in database
@@ -152,3 +162,7 @@ if __name__ == "__main__":
 
     svm_time = time() - svm_time
     print(f"RUN {args.run_id} dims {X.shape[0]} {X.shape[1]} SVM {args.data.upper()} mean {np.mean(acc):.4f} std {np.std(acc):.4f}")
+
+
+if __name__ == "__main__":
+    compute_svm(passed_args=None)

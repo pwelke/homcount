@@ -42,7 +42,7 @@ class MLP(nn.Module):
         return F.log_softmax(x, dim=-1)
 
 
-if __name__ == "__main__":
+def compute_mlp(passed_args=None):
 
     hom_types = get_hom_profile(None)
 
@@ -51,7 +51,6 @@ if __name__ == "__main__":
     parser.add_argument('--pattern_count', type=int, default=50)
     parser.add_argument('--run_id', type=str, default=0)
     parser.add_argument('--hom_size', type=int, default=6)
-
     parser.add_argument('--data', default='MUTAG')
     parser.add_argument('--hom_type', type=str, choices=hom_types)
     parser.add_argument('--dloc', type=str, default="./data")
@@ -74,7 +73,17 @@ if __name__ == "__main__":
     # parameters for compatibility that will be ignored
     parser.add_argument("--grid_search", action="store_true", default=False)
 
-    args = parser.parse_args()
+    # Load partial args instead of command line args (if they are given)
+    if passed_args is not None:
+        # Transform dict to list of args
+        list_args = []
+        for key,value in passed_args.items():
+            # The case with "" happens if we want to pass an argument that has no parameter
+            list_args += [key, str(value)]
+
+        args = parser.parse_args(list_args)
+    else:
+        args = parser.parse_args()
 
     if args.hom_size == -1:
         args.hom_size = 'max' # use maximum graph size in database
@@ -205,3 +214,7 @@ if __name__ == "__main__":
 
     print(f"RUN {args.run_id} dims {tensorX.shape[0]} {tensorX.shape[1]} MLP {args.data.upper()} mean {np.mean(scores):.4f} std {np.std(scores):.4f}")
 
+
+
+if __name__ == "__main__":
+    compute_mlp(passed_args=None)

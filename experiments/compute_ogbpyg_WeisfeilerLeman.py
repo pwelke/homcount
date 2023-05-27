@@ -3,7 +3,6 @@ import itertools
 import sys
 import os
 import hashlib
-from ghc.utils.converter import file_overflow_filter, file_singleton_filter
 
 # parameters to iterate over
 cwd = './'
@@ -23,13 +22,13 @@ datasets = [
             'ogbg-molhiv',
             ]
 
-executables = ['pattern_extractors/just_homomorphism.py', ] 
+executables = ['pattern_extractors/hom.py', ] 
 
 run_ids = ['run1']
 
 pattern_counts = [1,2,3,4,5] 
 
-hom_types = ['wl_kernel']
+hom_types = ['wl_kernel'] # choices: min_kernel, full_kernel, wl_kernel
 
 hom_size = 'max'
 
@@ -48,6 +47,6 @@ for run_id, dataset, executable, pattern_count, hom_type in itertools.product(ru
             '--pattern_count', str(pattern_count),
             '--run_id', run_id,
             '--hom_type', hom_type,
-            '--hom_size', '-1',
+            '--hom_size', '-1', # -1: select largest pattern size to be equal to largest graph in training set
             ]
     subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
