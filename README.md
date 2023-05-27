@@ -1,19 +1,37 @@
 # Expectation Complete Graph Representations
 
 This repository contains the code to compute graph representations that are complete in expectation. 
-If you use this code in your work or find it useful in any other way, please consider accepting our paper :).
+Its sister repository [HomCountGNNs](https://github.com/ocatias/HomCountGNNs) contains the code to train GNNs using the expectation-complete graph representations.
+If you use this code in your work or find it useful in any other way, please consider citing our paper.
+
+```
+@inproceedings{welke2023expectation,
+publicationtype = {preprint},
+  pdf = {https://openreview.net/pdf?id=ppgRPC14uI},
+  code = {https://github.com/pwelke/homcount},
+  reviews = {https://openreview.net/forum?id=ppgRPC14uI},
+  venuetype = {conference},
+  venueurl = {https://icml.cc/2023},
+  author       = {Pascal Welke* and Maximilian Thiessen* and Fabian Jogl and Thomas Gärtner},
+  title        = {Expectation-Complete Graph Representations with Homomorphisms},
+  booktitle    = {International Conference on Machine Learning ({ICML})},
+  year = {2023},  
+}
+```
+
+This repository started as a fork of [graph-homomorphism-convolution](https://github.com/gear/graph-homomorphism-network). Thanks to NT Hoang!
+
 
 # Installation
 
 ## System Setup
 Ensure that you have python installed, cmake, and a recent c++ compiler available.
-Currently, java is also a dependency, but it is superfluous.
 
 ## Clone Repo
 
 To run the code in this repository, clone it somewhere and initialize the git submodules
 ```
-git clone git@anonymous.4open.science/r/HomCount_Counts_ICML_2023.git
+git clone https://github.com/pwelke/HomSub
 cd homcount
 git submodule init
 git submodule update
@@ -21,7 +39,7 @@ git submodule update
 
 ## Building HomSub
 
-To compile c++ part, enter the `HomSub` and compile the code
+To compile c++ part, enter the `HomSub` folder and compile the code
 
 ```
 cd HomSub
@@ -33,83 +51,34 @@ sh build.sh
 
 ## Python Setup
 
-Create a virtual environment, using python 3.7 (!) and install dependencies, e.g. with anaconda:
+Create a virtual environment, using python >=3.7 and install dependencies, e.g. with anaconda:
 
 ```
-cd graph-homomorphism-network
-conda create -n expectation_complete python==3.7
+conda create -n expectation_complete
 conda activate expectation_complete
-pip install -r requirements_dev.txt
+pip install -r requirements.txt
 python setup.py install
 ```
 
+The dependency ogb (Open Graph Benchmark) is only necessary if you want to download the ogb-provided datasets ogbg-mol*.
+
 # Compute Embeddings and Evaluate Results
 
-- Download data from [here](https://drive.google.com/file/d/15w7UyqG_MjCqdRL2fA87m7-vanjddKNh/view?usp=sharing) and unzip it into `graph-homomorphism-network/data`.
-- Run (in the virtual environment) `python experiments.py`, to only compute the embeddings of the selected datasets (if not already done) and save them in `graph-homomorphism-network/data/precompute`.
-- Run (in the virtual environment) `python evaluation.py`, to compute a number of embeddings of the selected datasets (if not already done) and save them in `graph-homomorphism-network/data/precompute`. After that, run 10-fold cross validations for the MLP and SVM classifiers. 
-- Note that there is currently a race condition with a temp file in . Hence, you cannot run multiple experiments simultaneously on the project folder. A workaroud would be to copy the full project folder multiple times.
-- Currently, the average accuracies have to be manually collected from the output of evaluation.py.
+- Download data from [here](https://drive.google.com/file/d/15w7UyqG_MjCqdRL2fA87m7-vanjddKNh/view?usp=sharing) and unzip it into `data/graphbds`.
+- Run (in the virtual environment) `python experiments/compute_ogbpyg.py`, to compute the embeddings of the selected datasets (if not already done) and save them in `data/homcount`.
+    - `data/homcount` now contains files with the extension `.homson` that are json formatted and contain information on pattern sizes and, for each graph, the computed pattern counts. 
+    - patterns are stored as pickled networkx graphs in files with extension `.patterns`
+    - homomorphism counts are also stored in binary numpy format in files with extension `.hom`
+- Run (in the virtual environment) `python experiments/compute_TUDatasets.py`, to compute a number of embeddings of the selected datasets (if not already done) and save them in `data/homcount`. After that, the script runs 10-fold cross validations for the MLP and SVM classifiers. 
+- Note that there is currently a race condition with a temp file in the C++ part of the homomorphism computation. Hence, you cannot run multiple experiments simultaneously on the project folder. A workaroud would be to copy the full project folder multiple times.
+- Currently, the average accuracies have to be manually collected from the output of `experiments/compute_TUDatasets.py`.
+- GNN training and performance evaluation is delegated to the code in [HomCountGNNs](https://github.com/ocatias/HomCountGNNs)
 
 
-# README of graph-homomorphism-network
+## Computation of Homomorphism Counts from Python
 
-TODO: This is the old readme of the merged project and should be integrated here
-
-
-# Graph Homomorphism Sampling and Counting
-
-Our code to sample patterns and then count homomorphisms started as a fork
-of the [code for the Graph Homomorphism Convolution](https://github.com/gear/graph-homomorphism-network) paper. 
-
-Below, you can find the original README of that repository, but be aware that we have changed quite a few things, in particular `mlp.py` and `svm.py`, as well as large parts of the ghc package.
-
-
-## Graph Homomorphism Convolution
-Proof of concept for Graph Homomorphism Convolution.
-http://arxiv.org/abs/2005.01214 (ICML'20)
-
-Note: Code for left homomorphism is for our ICML'20 paper.
-Code for right homomorphism is our continued work.
-
-### Run experiments
-Experiment scripts are placed in the top level of this repository and named 
-by the machine learning model. In general, a 10-fold CV score is reported.
-For example,
-```
-python models/mlp.py --data mutag --hom_type tree --hom_size 6 
-python models/mlp.py --data mutag --hom_type labeled_tree --hom_size 6
-```
-The 10-fold splits for MUTAG, COLLAB, IMDBBINARY, IMDBMULTI, NCI1, PROTEINS, and
-PTC are taken from `weihua916/powerful-gnns`. The others are generated with 
-`sklearn.model_selection.StratifiedKFold` at random seed 0.
-
-Note: CPU run will cause some segmentation fault upon script exit.
-
-Cite us as:
-```
-@InProceedings{
-    nt20ghc, 
-    title = {Graph Homomorphism Convolution}, 
-    author = {NT, Hoang and Maehara, Takanori}, 
-    booktitle = {Proceedings of the 37th International Conference on Machine Learning}, 
-    pages = {7306--7316}, 
-    year = {2020}, 
-    editor = {Hal Daumé III and Aarti Singh}, 
-    volume = {119}, 
-    series = {Proceedings of Machine Learning Research}, 
-    address = {Virtual}, 
-    month = {13--18 Jul}, 
-    publisher = {PMLR}, 
-    pdf = {http://proceedings.mlr.press/v119/nguyen20c/nguyen20c.pdf},, 
-    url = {http://proceedings.mlr.press/v119/nguyen20c.html}, 
-}
-```
-
-Note: There is a bug in homlib for `atlas[100:]`.
-
-
-
+The file `pattern_extractors/hom.py` contains a function `compute_hom`. You can call it with your parameters of choice to go from graph database to computed homomorphism patterns.
+If you need to transform your graphs into the required input format, have a look at the files in `dataset_conversion`. Dataset imports from the Open Graph Benchmark or from Pytorch Geometric should be possible more or less straight away. 
 
 
 

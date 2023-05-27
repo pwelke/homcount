@@ -25,9 +25,9 @@ def read(*names, **kwargs):
 
 setup(
     name='ghc',
-    version='0.2',
+    version='0.3',
     license='MIT',
-    description='A prototype for graph homomorphism convolution.',
+    description='Code to compute Expectation-Complete Graph Embeddings',
     author='Pascal Welke, Maximilian Thiessen, NT Hoang',
     author_email='pascal.welke@tuwien.ac.at',
     url='https://github.com/pwelke/homcount',
@@ -38,7 +38,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     keywords=[
-        'graph homomorphism', 'graph neural networks'
+        'graph homomorphism', 'graph neural networks', 'expressive graph representation'
     ],
     python_requires='>=3.7',
 )

@@ -8,4 +8,5 @@ scikit-learn==0.24.0
 tqdm==4.56.0
 matplotlib
 pandas
+ogb
 -e .
