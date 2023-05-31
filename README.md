@@ -29,12 +29,10 @@ Ensure that you have python installed, cmake, and a recent c++ compiler availabl
 
 ## Clone Repo
 
-To run the code in this repository, clone it somewhere and initialize the git submodules
+To run the code in this repository, clone it somewhere and initialize all git submodules
 ```
-git clone https://github.com/pwelke/HomSub
+git clone --recurse-submodules https://github.com/pwelke/homcount
 cd homcount
-git submodule init
-git submodule update
 ```
 
 ## Building HomSub
@@ -43,28 +41,37 @@ To compile c++ part, enter the `HomSub` folder and compile the code
 
 ```
 cd HomSub
-git submodule init
-git submodule update
 sh build-third-party.sh
 sh build.sh
+cd ..
 ```
 
 ## Python Setup
 
 Create a virtual environment, using python >=3.7 and install dependencies, e.g. with anaconda:
+Make sure, you are in the base directory, again.
 
 ```
 conda create -n expectation_complete
 conda activate expectation_complete
 pip install -r requirements.txt
-python setup.py install
 ```
 
 The dependency ogb (Open Graph Benchmark) is only necessary if you want to download the ogb-provided datasets ogbg-mol*.
 
 # Compute Embeddings and Evaluate Results
 
-- Download data from [here](https://drive.google.com/file/d/15w7UyqG_MjCqdRL2fA87m7-vanjddKNh/view?usp=sharing) and unzip it into `data/graphbds`.
+## Downloading Data
+You can either download all data files used for the experiments in our paper via a single link, or run scripts that download them from different sources.
+
+- [Download the graph datasets from here](https://drive.google.com/file/d/15w7UyqG_MjCqdRL2fA87m7-vanjddKNh/view?usp=sharing) and unzip them into `data/graphbds`.
+- Alternatively, run (in the virtual environment) the scripts in `dataset_conversion`. These create the required datasets in the correct location. 
+If you need to transform your own graphs into the required input format, have a look at the files in `dataset_conversion`. Dataset imports from the Open Graph Benchmark or from Pytorch Geometric should be possible more or less straight away. 
+
+## Downloading Embeddings
+As our embeddings are inherently randomized and as it is difficult to reliably reproduce randomized experiments on different hardware and software stacks, we also provide the embeddings we have used for our experiments. [You can download the embeddings here]()
+
+## Rerunning our Experiments 
 - Run (in the virtual environment) `python experiments/compute_ogbpyg.py`, to compute the embeddings of the selected datasets (if not already done) and save them in `data/homcount`.
     - `data/homcount` now contains files with the extension `.homson` that are json formatted and contain information on pattern sizes and, for each graph, the computed pattern counts. 
     - patterns are stored as pickled networkx graphs in files with extension `.patterns`
