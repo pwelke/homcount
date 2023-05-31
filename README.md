@@ -64,12 +64,12 @@ The dependency ogb (Open Graph Benchmark) is only necessary if you want to downl
 ## Downloading Data
 You can either download all data files used for the experiments in our paper via a single link, or run scripts that download them from different sources.
 
-- [Download the graph datasets from here](https://drive.google.com/file/d/15w7UyqG_MjCqdRL2fA87m7-vanjddKNh/view?usp=sharing) and unzip them into `data/graphbds`.
+- [Download the graph datasets from here](https://owncloud.tuwien.ac.at/index.php/s/TJH1sipejpAOfdR) and unzip them into `data/graphbds`.
 - Alternatively, run (in the virtual environment) the scripts in `dataset_conversion`. These create the required datasets in the correct location. 
 If you need to transform your own graphs into the required input format, have a look at the files in `dataset_conversion`. Dataset imports from the Open Graph Benchmark or from Pytorch Geometric should be possible more or less straight away. 
 
 ## Downloading Embeddings
-As our embeddings are inherently randomized and as it is difficult to reliably reproduce randomized experiments on different hardware and software stacks, we also provide the embeddings we have used for our experiments. [You can download the embeddings here]()
+As our embeddings are inherently randomized and as it is difficult to reliably reproduce randomized experiments on different hardware and software stacks, we also provide the embeddings we have used for our experiments. [You can download the embeddings here](https://owncloud.tuwien.ac.at/index.php/s/ok2VdgS7qTJXd0i)
 
 ## Rerunning our Experiments 
 - Run (in the virtual environment) `python experiments/compute_ogbpyg.py`, to compute the embeddings of the selected datasets (if not already done) and save them in `data/homcount`.
