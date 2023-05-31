@@ -1,5 +1,4 @@
 # Expectation Complete Graph Representations
-
 This repository contains the code to compute graph representations that are complete in expectation. 
 Its sister repository [HomCountGNNs](https://github.com/ocatias/HomCountGNNs) contains the code to train GNNs using the expectation-complete graph representations.
 If you use this code in your work or find it useful in any other way, please consider citing our paper.
@@ -24,11 +23,12 @@ This repository started as a fork of [graph-homomorphism-convolution](https://gi
 
 # Installation
 
+
 ## System Setup
 Ensure that you have python installed, cmake, and a recent c++ compiler available.
 
-## Clone Repo
 
+## Clone Repo
 To run the code in this repository, clone it somewhere and initialize all git submodules
 ```
 git clone --recurse-submodules https://github.com/pwelke/homcount
@@ -36,7 +36,6 @@ cd homcount
 ```
 
 ## Building HomSub
-
 To compile c++ part, enter the `HomSub` folder and compile the code
 
 ```
@@ -59,6 +58,7 @@ pip install -r requirements.txt
 
 The dependency ogb (Open Graph Benchmark) is only necessary if you want to download the ogb-provided datasets ogbg-mol*.
 
+
 # Compute Embeddings and Evaluate Results
 
 ## Downloading Data
@@ -68,10 +68,12 @@ You can either download all data files used for the experiments in our paper via
 - Alternatively, run (in the virtual environment) the scripts in `dataset_conversion`. These create the required datasets in the correct location. 
 If you need to transform your own graphs into the required input format, have a look at the files in `dataset_conversion`. Dataset imports from the Open Graph Benchmark or from Pytorch Geometric should be possible more or less straight away. 
 
+
 ## Downloading Embeddings
 As our embeddings are inherently randomized and as it is difficult to reliably reproduce randomized experiments on different hardware and software stacks, we also provide the embeddings we have used for our experiments. [You can download the embeddings here](https://owncloud.tuwien.ac.at/index.php/s/ok2VdgS7qTJXd0i)
 
-## Rerunning our Experiments 
+
+## Rerunning our Experiments from Shell
 - Run (in the virtual environment) `python experiments/compute_ogbpyg.py`, to compute the embeddings of the selected datasets (if not already done) and save them in `data/homcount`.
     - `data/homcount` now contains files with the extension `.homson` that are json formatted and contain information on pattern sizes and, for each graph, the computed pattern counts. 
     - patterns are stored as pickled networkx graphs in files with extension `.patterns`
@@ -83,7 +85,6 @@ As our embeddings are inherently randomized and as it is difficult to reliably r
 
 
 ## Computation of Homomorphism Counts from Python
-
 The file `pattern_extractors/hom.py` contains a function `compute_hom`. You can call it with your parameters of choice to go from graph database to computed homomorphism patterns.
 If you need to transform your graphs into the required input format, have a look at the files in `dataset_conversion`. Dataset imports from the Open Graph Benchmark or from Pytorch Geometric should be possible more or less straight away. 
 
