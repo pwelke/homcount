@@ -64,13 +64,15 @@ The dependency ogb (Open Graph Benchmark) is only necessary if you want to downl
 ## Downloading Data
 You can either download all data files used for the experiments in our paper via a single link, or run scripts that download them from different sources.
 
-- [Download the graph datasets from here](https://owncloud.tuwien.ac.at/index.php/s/TJH1sipejpAOfdR) and unzip them into `data/graphbds`.
+- [Download the graph datasets from here](https://owncloud.tuwien.ac.at/index.php/s/TJH1sipejpAOfdR/download) and unzip them into `data/graphbds`.
 - Alternatively, run (in the virtual environment) the scripts in `dataset_conversion`. These create the required datasets in the correct location. 
 If you need to transform your own graphs into the required input format, have a look at the files in `dataset_conversion`. Dataset imports from the Open Graph Benchmark or from Pytorch Geometric should be possible more or less straight away. 
 
 
 ## Downloading Embeddings
-As our embeddings are inherently randomized and as it is difficult to reliably reproduce randomized experiments on different hardware and software stacks, we also provide the embeddings we have used for our experiments. [You can download the embeddings here](https://owncloud.tuwien.ac.at/index.php/s/ok2VdgS7qTJXd0i)
+As our embeddings are inherently randomized and as it is difficult to reliably reproduce randomized experiments on different hardware and software stacks, we also provide the embeddings we have used for our experiments. [You can download the embeddings here](https://owncloud.tuwien.ac.at/index.php/s/ok2VdgS7qTJXd0i/download)
+
+(Note that, for historic reasons the files in the download have the extension `.singleton_filtered`, but are in the same format as the `.homson` files computed by our code as described below.)
 
 
 ## Rerunning our Experiments from Shell
