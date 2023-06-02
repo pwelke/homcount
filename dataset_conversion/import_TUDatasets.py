@@ -8,6 +8,7 @@ import torch
 
 
 def convert_from_pyg(dataset_name, save_path:str='data/graphdbs'):
+    makedirs(save_path, exist_ok=True)
 
     graphs = list()
     labels = list()

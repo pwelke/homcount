@@ -9,7 +9,7 @@ import json
 
 
 def convert_from_ogb(dataset_name, save_path:str='data/graphdbs/'):
-    
+    makedirs(save_path, exist_ok=True)
     dataset = GraphPropPredDataset(name = dataset_name, root = 'ogbdata/')
 
     # TODO: we don't use any train test validation split, yet

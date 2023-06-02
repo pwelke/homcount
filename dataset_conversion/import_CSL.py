@@ -11,6 +11,7 @@ def convert_from_csl(save_path:str='data/graphdbs/', source_path='dataset_conver
 
 
 def make_meta(save_path:str='data/graphdbs/'):
+    makedirs(save_path, exist_ok=True)
     metas = list()
     global_idx = 0
 

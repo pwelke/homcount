@@ -9,13 +9,13 @@ import torch_geometric as pyg
 
 
 def convert_from_pyg(save_path:str='data/graphdbs/'):
+    makedirs(save_path, exist_ok=True)
 
     graphs = list()
     labels = list()
     metas = list()
     global_idx = 0
 
-    makedirs(save_path, exist_ok=True)
 
     for split in ['train', 'val', 'test']:
 
