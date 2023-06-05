@@ -8,7 +8,7 @@ import hashlib
 cwd = './'
 dloc = 'data/'
 
-datasets = ['CSL']
+datasets = ['PAULUS25', ]#'CSL']
 
 executables = [ 'pattern_extractors/hom.py', 
                 'pattern_extractors/svm.py',
@@ -16,7 +16,7 @@ executables = [ 'pattern_extractors/hom.py',
 
 run_ids = ['full']
 
-pattern_counts = [5,]
+pattern_counts = [50,]
 
 hom_types = ['min_kernel', 'full_kernel'] # choices: min_kernel, full_kernel
 

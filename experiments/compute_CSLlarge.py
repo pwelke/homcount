@@ -1,7 +1,7 @@
 import subprocess
 import itertools
 import sys
-import os
+from os.path import join
 import hashlib
 
 # parameters to iterate over

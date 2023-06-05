@@ -1,7 +1,7 @@
 import subprocess
 import itertools
 import sys
-import os
+from os.path import join
 import hashlib 
 
 # parameters to iterate over
@@ -31,9 +31,9 @@ dloc = 'data'
 
 
 # download and preprocess all datasets
-args = ['python', 'import_from_ogb.py']
+args = ['python', join('dataset_conversion', 'import_ogbg.py')]
 subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
-args = ['python', 'import_from_pyg.py']
+args = ['python', join('dataset_conversion', 'import_TUDatasets.py')]
 subprocess.run(args, cwd=cwd, stdout=sys.stdout, stderr=sys.stderr, check=True)
 
 # a deterministic hash function returning a 32 bit integer value for a given utf-8 string
