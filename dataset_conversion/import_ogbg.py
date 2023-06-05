@@ -4,6 +4,7 @@ from ogb.graphproppred import GraphPropPredDataset
 import networkx as nx
 import pickle
 from os.path import join
+from os import makedirs
 import numpy as np
 import json
 
