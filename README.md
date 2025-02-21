@@ -5,7 +5,6 @@ If you use this code in your work or find it useful in any other way, please con
 
 ```
 @inproceedings{welke2023expectation,
-publicationtype = {preprint},
   pdf = {https://openreview.net/pdf?id=ppgRPC14uI},
   code = {https://github.com/pwelke/homcount},
   reviews = {https://openreview.net/forum?id=ppgRPC14uI},
